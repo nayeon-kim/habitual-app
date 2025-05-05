@@ -22,11 +22,8 @@
 		5B7FB2A82DC8968000217DD0 /* MDBBTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B7FB2A72DC8968000217DD0 /* MDBBTests.swift */; };
 		5B7FB2B22DC8968000217DD0 /* MDBBUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B7FB2B12DC8968000217DD0 /* MDBBUITests.swift */; };
 		5B7FB2B42DC8968000217DD0 /* MDBBUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B7FB2B32DC8968000217DD0 /* MDBBUITestsLaunchTests.swift */; };
-		5B7FB2C52DC89A7F00217DD0 /* Theme in Resources */ = {isa = PBXBuildFile; fileRef = 5B7FB2C22DC89A7F00217DD0 /* Theme */; };
 		5B7FB2C62DC89A7F00217DD0 /* Preview Content in Resources */ = {isa = PBXBuildFile; fileRef = 5B7FB2C32DC89A7F00217DD0 /* Preview Content */; };
 		5B7FB2C72DC89A7F00217DD0 /* Models in Resources */ = {isa = PBXBuildFile; fileRef = 5B7FB2C42DC89A7F00217DD0 /* Models */; };
-		5B7FB2C82DC89B5A00217DD0 /* Theme in Resources */ = {isa = PBXBuildFile; fileRef = 5B7FB2C22DC89A7F00217DD0 /* Theme */; };
-		5B7FB2C92DC89B5A00217DD0 /* Theme in Resources */ = {isa = PBXBuildFile; fileRef = 5B7FB2C22DC89A7F00217DD0 /* Theme */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,7 +60,6 @@
 		5B7FB2AD2DC8968000217DD0 /* MDBBUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MDBBUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5B7FB2B12DC8968000217DD0 /* MDBBUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDBBUITests.swift; sourceTree = "<group>"; };
 		5B7FB2B32DC8968000217DD0 /* MDBBUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDBBUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		5B7FB2C22DC89A7F00217DD0 /* Theme */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Theme; sourceTree = "<group>"; };
 		5B7FB2C32DC89A7F00217DD0 /* Preview Content */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "Preview Content"; sourceTree = "<group>"; };
 		5B7FB2C42DC89A7F00217DD0 /* Models */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Models; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -127,7 +123,6 @@
 				5B41FA232DC8A43300ACAA8E /* Views */,
 				5B7FB2C42DC89A7F00217DD0 /* Models */,
 				5B7FB2C32DC89A7F00217DD0 /* Preview Content */,
-				5B7FB2C22DC89A7F00217DD0 /* Theme */,
 				5B7FB2952DC8967F00217DD0 /* MDBBApp.swift */,
 				5B41FA2E2DC8A53D00ACAA8E /* ThemeManager.swift */,
 				5B41FA2A2DC8A51E00ACAA8E /* AddRoutineView.swift */,
@@ -271,7 +266,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				5B7FB2C72DC89A7F00217DD0 /* Models in Resources */,
-				5B7FB2C52DC89A7F00217DD0 /* Theme in Resources */,
 				5B7FB2C62DC89A7F00217DD0 /* Preview Content in Resources */,
 				5B7FB29E2DC8968000217DD0 /* Preview Assets.xcassets in Resources */,
 				5B7FB29A2DC8968000217DD0 /* Assets.xcassets in Resources */,
@@ -284,7 +278,6 @@
 			files = (
 				5B7F43932DC89CEF0074CE87 /* Preview Content in Resources */,
 				5B7F43912DC89CEC0074CE87 /* Models in Resources */,
-				5B7FB2C82DC89B5A00217DD0 /* Theme in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -294,7 +287,6 @@
 			files = (
 				5B7F43942DC89CF00074CE87 /* Preview Content in Resources */,
 				5B7F43922DC89CEC0074CE87 /* Models in Resources */,
-				5B7FB2C92DC89B5A00217DD0 /* Theme in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
