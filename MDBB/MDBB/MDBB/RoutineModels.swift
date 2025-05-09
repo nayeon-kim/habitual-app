@@ -78,6 +78,7 @@ struct RoutineDetailView: View {
     @State private var timeRemaining: TimeInterval = 0
     @State private var timer: Timer? = nil
     @State private var showingTimer = false
+    @State private var completedTaskIndices: Set<Int> = []
     var onBack: (() -> Void)? = nil
     
     var body: some View {
@@ -111,12 +112,26 @@ struct RoutineDetailView: View {
                 
                 // Tasks List (List)
                 List {
-                    ForEach(routine.tasks) { task in
+                    ForEach(Array(routine.tasks.enumerated()), id: \.offset) { index, task in
                         HStack {
-                            Image(systemName: "checkmark.circle")
-                                .foregroundColor(.green)
+                            Button(action: {
+                                toggleTaskCompletion(index: index)
+                            }) {
+                                if completedTaskIndices.contains(index) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.green)
+                                } else {
+                                    Image(systemName: "circle")
+                                        .foregroundColor(.gray)
+                                }
+                            }
+                            .buttonStyle(PlainButtonStyle())
                             Text(task.name)
                                 .foregroundColor(.white)
+                            Spacer()
+                            Text(task.formattedDuration)
+                                .foregroundColor(.white)
+                                .font(.subheadline)
                         }
                     }
                     // Add New Task Button
@@ -181,12 +196,17 @@ struct RoutineDetailView: View {
             }
         }
         .fullScreenCover(isPresented: $showingTimer) {
-            RoutineTimerView(routine: routine) {
-                showingTimer = false
-            }
+            RoutineTimerView(
+                routine: routine,
+                completedTaskIndices: $completedTaskIndices,
+                onClose: {
+                    showingTimer = false
+                }
+            )
         }
         .onAppear {
             UITableView.appearance().backgroundColor = .clear
+            completedTaskIndices = []
         }
         .onDisappear {
             UITableView.appearance().backgroundColor = nil
@@ -225,6 +245,14 @@ struct RoutineDetailView: View {
         let seconds = Int(timeInterval) % 60
         return String(format: "%02d:%02d", minutes, seconds)
     }
+    
+    private func toggleTaskCompletion(index: Int) {
+        if completedTaskIndices.contains(index) {
+            completedTaskIndices.remove(index)
+        } else {
+            completedTaskIndices.insert(index)
+        }
+    }
 }
 
 // Safe subscript for arrays
@@ -237,12 +265,12 @@ extension Array {
 // --- Full Screen Timer View ---
 struct RoutineTimerView: View {
     let routine: Routine
+    @Binding var completedTaskIndices: Set<Int>
     var onClose: () -> Void
     @State private var currentTaskIndex: Int = 0
     @State private var timeRemaining: TimeInterval = 0
     @State private var timer: Timer? = nil
     @State private var isComplete: Bool = false
-    @State private var completedTaskIndices: Set<Int> = []
     
     var body: some View {
         ZStack {
@@ -301,9 +329,9 @@ struct RoutineTimerView: View {
                             markTaskDoneAndNext()
                         }) {
                             HStack {
-                                Image(systemName: completedTaskIndices.contains(currentTaskIndex) ? "checkmark.circle.fill" : "checkmark.circle")
+                                Image(systemName: completedTaskIndices.contains(currentTaskIndex) ? "checkmark.circle.fill" : "circle")
                                     .font(.title)
-                                    .foregroundColor(.green)
+                                    .foregroundColor(completedTaskIndices.contains(currentTaskIndex) ? .green : .gray)
                                 Text(completedTaskIndices.contains(currentTaskIndex) ? "Done" : "Mark as Done")
                                     .font(.title3)
                                     .foregroundColor(.white)
