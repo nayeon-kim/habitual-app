@@ -173,6 +173,14 @@ struct RoutineDetailView: View {
                 }
             }
         }
+        .sheet(isPresented: $showingAddTask) {
+            AddTaskView { newTask in
+                var updatedRoutine = routine
+                updatedRoutine.tasks.append(newTask)
+                routine = updatedRoutine
+                routineStore.updateRoutine(updatedRoutine)
+            }
+        }
         .onAppear {
             UITableView.appearance().backgroundColor = .clear
         }
