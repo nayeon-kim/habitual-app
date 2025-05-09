@@ -37,35 +37,65 @@ struct Routine: Identifiable, Codable {
 }
 
 class RoutineStore: ObservableObject {
-    @Published var routines: [Routine] = []
+    @Published var routines: [Routine] = [] {
+        didSet {
+            saveRoutines()
+        }
+    }
+    
+    private let routinesFile = "routines.json"
+    
+    init() {
+        loadRoutines()
+    }
     
     func addRoutine(_ routine: Routine) {
         print("[DEBUG] Adding routine: \(routine.name), tasks: \(routine.tasks.count)")
         routines.append(routine)
         print("[DEBUG] Current routines: \(routines.map { $0.name })")
-        saveRoutines()
+        // saveRoutines() now handled by didSet
     }
     
     func updateRoutine(_ routine: Routine) {
         if let index = routines.firstIndex(where: { $0.id == routine.id }) {
             print("[DEBUG] Updating routine: \(routine.name)")
             routines[index] = routine
-            saveRoutines()
+            // saveRoutines() now handled by didSet
         }
     }
     
     func deleteRoutine(_ routine: Routine) {
         print("[DEBUG] Deleting routine: \(routine.name)")
         routines.removeAll { $0.id == routine.id }
-        saveRoutines()
+        // saveRoutines() now handled by didSet
     }
     
     private func saveRoutines() {
-        // TODO: Implement persistence
+        do {
+            let data = try JSONEncoder().encode(routines)
+            let url = getDocumentsDirectory().appendingPathComponent(routinesFile)
+            try data.write(to: url)
+            print("[DEBUG] Routines saved to \(url)")
+        } catch {
+            print("[ERROR] Failed to save routines: \(error)")
+        }
     }
     
     private func loadRoutines() {
-        // TODO: Implement loading from persistence
+        let url = getDocumentsDirectory().appendingPathComponent(routinesFile)
+        do {
+            let data = try Data(contentsOf: url)
+            let decoded = try JSONDecoder().decode([Routine].self, from: data)
+            routines = decoded
+            print("[DEBUG] Routines loaded from \(url)")
+        } catch {
+            print("[DEBUG] No routines file found or failed to load: \(error)")
+            routines = []
+        }
+    }
+    
+    private func getDocumentsDirectory() -> URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     }
 }
 
@@ -271,6 +301,7 @@ struct RoutineTimerView: View {
     @State private var timeRemaining: TimeInterval = 0
     @State private var timer: Timer? = nil
     @State private var isComplete: Bool = false
+    @State private var didAppear = false
     
     var body: some View {
         ZStack {
@@ -320,7 +351,7 @@ struct RoutineTimerView: View {
                                 .stroke(Color.green, style: StrokeStyle(lineWidth: 16, lineCap: .round))
                                 .rotationEffect(.degrees(-90))
                                 .frame(width: 200, height: 200)
-                                .animation(.linear(duration: 1), value: timeRemaining)
+                                .animation(didAppear ? .linear(duration: 1) : nil, value: timeRemaining)
                             Text(timeString(from: timeRemaining))
                                 .font(.system(size: 48, weight: .bold, design: .monospaced))
                                 .foregroundColor(.white)
@@ -348,6 +379,9 @@ struct RoutineTimerView: View {
         }
         .onAppear {
             startTask()
+            DispatchQueue.main.async {
+                didAppear = true
+            }
         }
         .onDisappear {
             timer?.invalidate()

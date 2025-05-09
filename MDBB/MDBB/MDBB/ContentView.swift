@@ -72,18 +72,19 @@ struct ContentView: View {
                 
                 // Large Add Button
                 Button(action: { showingAddRoutine = true }) {
-                    VStack(spacing: 12) {
+                    HStack {
                         Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 40))
+                            .font(.system(size: 28))
                         Text("Add New Routine")
                             .font(.title2)
                             .fontWeight(.semibold)
+                        Spacer()
                     }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 300)
+                    .padding()
                     .background(Theme.accent)
                     .foregroundColor(.white)
-                    .cornerRadius(12)
+                    .cornerRadius(Theme.cornerRadius)
+                    .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
                     .padding(.horizontal, 16)
                 }
                 .padding(.bottom, 16)
