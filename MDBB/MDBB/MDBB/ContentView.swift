@@ -10,38 +10,136 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject private var routineStore: RoutineStore
     @State private var showingAddRoutine = false
+    @State private var currentGreeting: String = ""
+    @State private var timer: Timer?
+    @State private var selectedRoutine: Routine? = nil
+    @State private var showDetail = false
+    @Namespace private var cardAnimation
+    
+    private func getTimeBasedGreeting() -> String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        
+        switch hour {
+        case 0..<12:
+            return "Good Morning"
+        case 12..<17:
+            return "Good Afternoon"
+        case 17..<22:
+            return "Good Evening"
+        default:
+            return "Good Night"
+        }
+    }
     
     var body: some View {
-        NavigationView {
-            ZStack {
-                Theme.background
-                    .ignoresSafeArea()
+        ZStack {
+            LinearGradient(
+                gradient: Gradient(colors: [Color(red: 61/255, green: 12/255, blue: 102/255), Color(red: 120/255, green: 53/255, blue: 150/255)]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // Greeting
+                Text(currentGreeting)
+                    .font(.system(size: 20))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 16)
                 
                 ScrollView {
-                    LazyVStack(spacing: Theme.padding) {
-                        ForEach(routineStore.routines) { routine in
-                            RoutineCard(routine: routine)
-                                .transition(.scale.combined(with: .opacity))
+                    VStack(spacing: Theme.padding) {
+                        LazyVStack(spacing: Theme.padding) {
+                            ForEach(routineStore.routines) { routine in
+                                if selectedRoutine?.id != routine.id || !showDetail {
+                                    RoutineCard(routine: routine)
+                                        .matchedGeometryEffect(id: routine.id, in: cardAnimation)
+                                        .onTapGesture {
+                                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                                                selectedRoutine = routine
+                                                showDetail = true
+                                            }
+                                        }
+                                        .transition(.scale.combined(with: .opacity))
+                                }
+                            }
                         }
+                        .padding()
                     }
-                    .padding()
                 }
-            }
-            .navigationTitle("My Routines")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showingAddRoutine = true }) {
+                
+                // Large Add Button
+                Button(action: { showingAddRoutine = true }) {
+                    VStack(spacing: 12) {
                         Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 40))
+                        Text("Add New Routine")
                             .font(.title2)
-                            .foregroundColor(Theme.accent)
+                            .fontWeight(.semibold)
                     }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 300)
+                    .background(Theme.accent)
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+                    .padding(.horizontal, 16)
+                }
+                .padding(.bottom, 16)
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("My Routines")
+                        .font(.subheadline)
+                        .foregroundColor(Theme.textSecondary)
                 }
             }
             .sheet(isPresented: $showingAddRoutine) {
                 AddRoutineView(routineStore: routineStore)
             }
+            
+            // Full screen detail view with matched geometry effect
+            if let routine = selectedRoutine, showDetail {
+                Color.black.opacity(0.5)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .zIndex(1)
+                ZStack(alignment: .topLeading) {
+                    RoutineDetailView(
+                        routine: routine,
+                        routineStore: routineStore,
+                        onBack: {
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                                showDetail = false
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                selectedRoutine = nil
+                            }
+                        }
+                    )
+                    .matchedGeometryEffect(id: routine.id, in: cardAnimation)
+                    .zIndex(2)
+                }
+                .zIndex(2)
+            }
         }
         .preferredColorScheme(.dark)
+        .onAppear {
+            // Set initial greeting
+            currentGreeting = getTimeBasedGreeting()
+            
+            // Create timer to update greeting every minute
+            timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
+                currentGreeting = getTimeBasedGreeting()
+            }
+        }
+        .onDisappear {
+            // Clean up timer when view disappears
+            timer?.invalidate()
+            timer = nil
+        }
     }
 }
 

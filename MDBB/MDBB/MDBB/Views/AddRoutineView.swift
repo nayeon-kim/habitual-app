@@ -56,7 +56,7 @@ struct AddRoutineView: View {
                     Button("Save") {
                         saveRoutine()
                     }
-                    .disabled(routineName.isEmpty)
+                    .disabled(routineName.isEmpty || tasks.isEmpty)
                 }
             }
             .sheet(isPresented: $showingAddTask) {
