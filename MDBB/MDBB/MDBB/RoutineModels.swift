@@ -24,6 +24,7 @@ struct Routine: Identifiable, Codable {
     var lastCompleted: Date?
     var createdAt: Date
     var isActive: Bool
+    var completionDates: [Date] = []
     
     var totalDuration: TimeInterval {
         tasks.reduce(0) { $0 + $1.duration }
@@ -33,6 +34,13 @@ struct Routine: Identifiable, Codable {
         let minutes = Int(totalDuration) / 60
         let seconds = Int(totalDuration) % 60
         return String(format: "%d:%02d", minutes, seconds)
+    }
+    
+    func wasCompletedOn(_ date: Date) -> Bool {
+        let calendar = Calendar.current
+        return completionDates.contains { completionDate in
+            calendar.isDate(completionDate, inSameDayAs: date)
+        }
     }
 }
 
@@ -102,6 +110,7 @@ class RoutineStore: ObservableObject {
 struct RoutineDetailView: View {
     @State var routine: Routine
     @ObservedObject var routineStore: RoutineStore
+    @Environment(\.dismiss) private var dismiss
     @State private var showingAddTask = false
     @State private var isRunning = false
     @State private var currentTaskIndex = 0
@@ -268,6 +277,15 @@ struct RoutineDetailView: View {
             timer = nil
             isRunning = false
         }
+    }
+    
+    private func completeRoutine() {
+        var updatedRoutine = routine
+        updatedRoutine.streak += 1
+        updatedRoutine.lastCompleted = Date()
+        updatedRoutine.completionDates.append(Date())
+        routineStore.updateRoutine(updatedRoutine)
+        dismiss()
     }
     
     private func timeString(from timeInterval: TimeInterval) -> String {

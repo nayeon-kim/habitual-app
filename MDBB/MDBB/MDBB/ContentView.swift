@@ -43,14 +43,19 @@ struct ContentView: View {
             VStack(spacing: 0) {
                 // Greeting
                 Text(currentGreeting)
-                    .font(.system(size: 20))
+                    .font(.system(size: 32, weight: .bold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16)
-                    .padding(.top, 16)
+                    .padding(.top, 24)
+                    .padding(.bottom, 8)
                 
                 ScrollView {
                     VStack(spacing: Theme.padding) {
+                        if !routineStore.routines.isEmpty {
+                            WeeklyStreakCard(routines: routineStore.routines)
+                        }
+                        
                         LazyVStack(spacing: Theme.padding) {
                             ForEach(routineStore.routines) { routine in
                                 if selectedRoutine?.id != routine.id || !showDetail {
@@ -81,7 +86,14 @@ struct ContentView: View {
                         Spacer()
                     }
                     .padding()
-                    .background(Theme.accent)
+                    .background(
+                        RadialGradient(
+                            gradient: Gradient(colors: [Color.white.opacity(0.05), Color.white.opacity(0.5)]),
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: 100
+                        )
+                    )
                     .foregroundColor(.white)
                     .cornerRadius(Theme.cornerRadius)
                     .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
@@ -153,13 +165,13 @@ struct RoutineCard: View {
                 Text(routine.name)
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundColor(Theme.text)
+                    .foregroundColor(.white)
                 
                 Spacer()
                 
                 Text(routine.formattedTotalDuration)
                     .font(.subheadline)
-                    .foregroundColor(Theme.textSecondary)
+                    .foregroundColor(.white.opacity(0.7))
             }
             
             HStack {
@@ -171,11 +183,91 @@ struct RoutineCard: View {
                 
                 Text("\(routine.tasks.count) tasks")
                     .font(.caption)
-                    .foregroundColor(Theme.textSecondary)
+                    .foregroundColor(.white.opacity(0.7))
             }
         }
         .padding()
-        .background(Theme.surface)
+        .background(
+            RadialGradient(
+                gradient: Gradient(colors: [Color.white.opacity(0.05), Color.white.opacity(0.5)]),
+                center: .center,
+                startRadius: 0,
+                endRadius: 100
+            )
+        )
+        .cornerRadius(Theme.cornerRadius)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+    }
+}
+
+struct WeeklyStreakCard: View {
+    let routines: [Routine]
+    private let calendar = Calendar.current
+    private let weekDays = ["S", "M", "T", "W", "T", "F", "S"]
+    
+    private var weekDates: [Date] {
+        let today = Date()
+        return (0..<7).map { dayOffset in
+            calendar.date(byAdding: .day, value: -6 + dayOffset, to: today)!
+        }
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: Theme.smallPadding) {
+            Text("Weekly Progress")
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+            
+            VStack(spacing: 12) {
+                ForEach(routines) { routine in
+                    HStack(alignment: .center, spacing: 12) {
+                        Text(routine.name)
+                            .font(.subheadline)
+                            .foregroundColor(.white)
+                            .frame(width: 100, alignment: .leading)
+                            .lineLimit(1)
+                        
+                        HStack(spacing: 8) {
+                            ForEach(0..<7) { index in
+                                VStack(spacing: 4) {
+                                    Circle()
+                                        .fill(
+                                            RadialGradient(
+                                                gradient: Gradient(colors: [
+                                                    routine.wasCompletedOn(weekDates[index]) ? Color.white.opacity(0.5) : Color.white.opacity(0.05),
+                                                    routine.wasCompletedOn(weekDates[index]) ? Color.white.opacity(0.8) : Color.white.opacity(0.1)
+                                                ]),
+                                                center: .center,
+                                                startRadius: 0,
+                                                endRadius: 20
+                                            )
+                                        )
+                                        .frame(width: 24, height: 24)
+                                        .overlay(
+                                            Circle()
+                                                .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                                        )
+                                    
+                                    Text(weekDays[index])
+                                        .font(.caption2)
+                                        .foregroundColor(.white.opacity(0.7))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(
+            RadialGradient(
+                gradient: Gradient(colors: [Color.white.opacity(0.05), Color.white.opacity(0.5)]),
+                center: .center,
+                startRadius: 0,
+                endRadius: 100
+            )
+        )
         .cornerRadius(Theme.cornerRadius)
         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
