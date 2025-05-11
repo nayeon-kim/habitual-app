@@ -215,12 +215,30 @@ struct WeeklyStreakCard: View {
         }
     }
     
+    private var dateRangeString: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MMM d"
+        
+        let startDate = weekDates.first!
+        let endDate = weekDates.last!
+        
+        return "\(dateFormatter.string(from: startDate)) - \(dateFormatter.string(from: endDate))"
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.smallPadding) {
-            Text("Weekly Progress")
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
+            HStack {
+                Text("Weekly Progress")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                
+                Spacer()
+                
+                Text(dateRangeString)
+                    .font(.subheadline)
+                    .foregroundColor(.white.opacity(0.7))
+            }
             
             VStack(spacing: 12) {
                 ForEach(routines) { routine in
@@ -273,6 +291,7 @@ struct WeeklyStreakCard: View {
         )
         .cornerRadius(Theme.cornerRadius)
         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .padding(.horizontal, 16)
     }
 }
 
