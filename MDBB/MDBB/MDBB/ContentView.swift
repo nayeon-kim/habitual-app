@@ -33,13 +33,21 @@ struct ContentView: View {
     
     var body: some View {
         ZStack {
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color(red: 61/255, green: 12/255, blue: 102/255),
-                    Color(red: 120/255, green: 53/255, blue: 150/255)
-                ]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
+            // First radial gradient (top right, bright purple)
+            RadialGradient(
+                gradient: Gradient(colors: [Color.purple.opacity(0.8), Color.black.opacity(0.6)]),
+                center: .topTrailing,
+                startRadius: 50,
+                endRadius: 500
+            )
+            .ignoresSafeArea()
+
+            // Second radial gradient (bottom left, deep blue/purple)
+            RadialGradient(
+                gradient: Gradient(colors: [Color.blue.opacity(0.5), Color.black]),
+                center: .bottomLeading,
+                startRadius: 100,
+                endRadius: 600
             )
             .ignoresSafeArea()
             
@@ -57,6 +65,7 @@ struct ContentView: View {
                     VStack(spacing: Theme.padding) {
                         if !routineStore.routines.isEmpty {
                             WeeklyStreakCard(routines: routineStore.routines)
+                                .padding(.horizontal, 16)
                         }
                         
                         LazyVStack(spacing: Theme.padding) {
@@ -89,16 +98,9 @@ struct ContentView: View {
                         Spacer()
                     }
                     .padding()
-                    .background(
-                        RadialGradient(
-                            gradient: Gradient(colors: [Color.white.opacity(0.05), Color.white.opacity(0.5)]),
-                            center: .center,
-                            startRadius: 0,
-                            endRadius: 100
-                        )
-                    )
+                    .background(Color.white.opacity(0.2))
                     .foregroundColor(.white)
-                    .cornerRadius(Theme.cornerRadius)
+                    .cornerRadius(20)
                     .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
                     .padding(.horizontal, 16)
                 }
@@ -190,16 +192,8 @@ struct RoutineCard: View {
             }
         }
         .padding()
-        .background(
-            RadialGradient(
-                gradient: Gradient(colors: [Color.white.opacity(0.05), Color.white.opacity(0.5)]),
-                center: .center,
-                startRadius: 0,
-                endRadius: 100
-            )
-        )
-        .cornerRadius(Theme.cornerRadius)
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .background(Color.white.opacity(0.2))
+        .cornerRadius(20)
     }
 }
 
@@ -287,17 +281,9 @@ struct WeeklyStreakCard: View {
             }
         }
         .padding()
-        .background(
-            RadialGradient(
-                gradient: Gradient(colors: [Color.white.opacity(0.05), Color.white.opacity(0.5)]),
-                center: .center,
-                startRadius: 0,
-                endRadius: 100
-            )
-        )
-        .cornerRadius(Theme.cornerRadius)
+        .background(Color.white.opacity(0.2))
+        .cornerRadius(20)
         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-        .padding(.horizontal, 16)
     }
 }
 
