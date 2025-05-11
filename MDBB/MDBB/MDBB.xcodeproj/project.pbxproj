@@ -11,6 +11,7 @@
 		5B41FA2C2DC8A51E00ACAA8E /* AddRoutineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B41FA2A2DC8A51E00ACAA8E /* AddRoutineView.swift */; };
 		5B41FA2D2DC8A51E00ACAA8E /* RoutineExecutionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B41FA2B2DC8A51E00ACAA8E /* RoutineExecutionView.swift */; };
 		5B41FA2F2DC8A53D00ACAA8E /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B41FA2E2DC8A53D00ACAA8E /* ThemeManager.swift */; };
+		5B7C2B042DD04D4D00625C26 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B7C2B032DD04D4D00625C26 /* UIKit.framework */; platformFilter = ios; };
 		5B7F43912DC89CEC0074CE87 /* Models in Resources */ = {isa = PBXBuildFile; fileRef = 5B7FB2C42DC89A7F00217DD0 /* Models */; };
 		5B7F43922DC89CEC0074CE87 /* Models in Resources */ = {isa = PBXBuildFile; fileRef = 5B7FB2C42DC89A7F00217DD0 /* Models */; };
 		5B7F43932DC89CEF0074CE87 /* Preview Content in Resources */ = {isa = PBXBuildFile; fileRef = 5B7FB2C32DC89A7F00217DD0 /* Preview Content */; };
@@ -49,6 +50,7 @@
 		5B41FA2A2DC8A51E00ACAA8E /* AddRoutineView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddRoutineView.swift; sourceTree = "<group>"; };
 		5B41FA2B2DC8A51E00ACAA8E /* RoutineExecutionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoutineExecutionView.swift; sourceTree = "<group>"; };
 		5B41FA2E2DC8A53D00ACAA8E /* ThemeManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
+		5B7C2B032DD04D4D00625C26 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.4.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
 		5B7FB2922DC8967F00217DD0 /* MDBB.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MDBB.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5B7FB2952DC8967F00217DD0 /* MDBBApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDBBApp.swift; sourceTree = "<group>"; };
 		5B7FB2972DC8967F00217DD0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -69,6 +71,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5B7C2B042DD04D4D00625C26 /* UIKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -96,12 +99,21 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		5B7C2B022DD04D4D00625C26 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5B7C2B032DD04D4D00625C26 /* UIKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		5B7FB2892DC8967F00217DD0 = {
 			isa = PBXGroup;
 			children = (
 				5B7FB2942DC8967F00217DD0 /* MDBB */,
 				5B7FB2A62DC8968000217DD0 /* MDBBTests */,
 				5B7FB2B02DC8968000217DD0 /* MDBBUITests */,
+				5B7C2B022DD04D4D00625C26 /* Frameworks */,
 				5B7FB2932DC8967F00217DD0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -472,7 +484,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
@@ -480,10 +492,11 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.hellonay.MDBB;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -511,7 +524,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
@@ -519,10 +532,11 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.hellonay.MDBB;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct Theme {
     static let primary = Color("Primary")
@@ -21,11 +22,11 @@ struct Theme {
 }
 
 extension Color {
-    static let systemBackground = Color(UIColor.systemBackground)
-    static let secondarySystemBackground = Color(UIColor.secondarySystemBackground)
-    static let tertiarySystemBackground = Color(UIColor.tertiarySystemBackground)
+    static let systemBackground = Color(uiColor: .systemBackground)
+    static let secondarySystemBackground = Color(uiColor: .secondarySystemBackground)
+    static let tertiarySystemBackground = Color(uiColor: .tertiarySystemBackground)
     
-    static let label = Color(UIColor.label)
-    static let secondaryLabel = Color(UIColor.secondaryLabel)
-    static let tertiaryLabel = Color(UIColor.tertiaryLabel)
+    static let label = Color(uiColor: .label)
+    static let secondaryLabel = Color(uiColor: .secondaryLabel)
+    static let tertiaryLabel = Color(uiColor: .tertiaryLabel)
 } 
