@@ -124,7 +124,7 @@ struct RoutineDetailView: View {
                             .fontWeight(.bold)
                             .padding()
                             .frame(width: 180)
-                            .background(isRunning ? Color.gray : Color.purple)
+                            .background(isRunning ? Color.gray : Color(red: 70/255, green: 20/255, blue: 172/255))
                             .foregroundColor(.white)
                             .cornerRadius(30)
                             .shadow(radius: 10)

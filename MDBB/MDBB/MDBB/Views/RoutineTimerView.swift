@@ -12,6 +12,7 @@ struct RoutineTimerView: View {
     
     var body: some View {
         ZStack {
+            Color.red.ignoresSafeArea() // TEMP: Should see a red background
             LinearGradient(
                 gradient: Gradient(colors: [Color.purple, Color.black]),
                 startPoint: .top,

@@ -15,6 +15,9 @@ struct ContentView: View {
     @State private var selectedRoutine: Routine? = nil
     @State private var showDetail = false
     @Namespace private var cardAnimation
+    @State private var showTimer = false
+    @State private var timerRoutine: Routine?
+    @State private var timerCompletedTaskIndices: [Int] = []
     
     private func getTimeBasedGreeting() -> String {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -62,15 +65,20 @@ struct ContentView: View {
                         LazyVStack(spacing: Theme.padding) {
                             ForEach(routineStore.routines) { routine in
                                 if selectedRoutine?.id != routine.id || !showDetail {
-                                    RoutineCard(routine: routine)
-                                        .matchedGeometryEffect(id: routine.id, in: cardAnimation)
-                                        .onTapGesture {
-                                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                                                selectedRoutine = routine
-                                                showDetail = true
-                                            }
+                                    RoutineCard(routine: routine, onPlay: {
+                                        print("Play button tapped for \(routine.name)")
+                                        timerRoutine = routine
+                                        timerCompletedTaskIndices = []
+                                        showTimer = true
+                                    })
+                                    .matchedGeometryEffect(id: routine.id, in: cardAnimation)
+                                    .onTapGesture {
+                                        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                                            selectedRoutine = routine
+                                            showDetail = true
                                         }
-                                        .transition(.scale.combined(with: .opacity))
+                                    }
+                                    .transition(.scale.combined(with: .opacity))
                                 }
                             }
                         }
@@ -140,6 +148,20 @@ struct ContentView: View {
                 }
                 .zIndex(2)
             }
+            
+            .fullScreenCover(isPresented: $showTimer) {
+                print("fullScreenCover triggered")
+                if let routine = timerRoutine {
+                    print("RoutineTimerView for \(routine.name)")
+                    RoutineTimerView(
+                        routine: routine,
+                        completedTaskIndices: $timerCompletedTaskIndices,
+                        onClose: { showTimer = false }
+                    )
+                } else {
+                    print("timerRoutine is nil")
+                }
+            }
         }
         .preferredColorScheme(.dark)
         .onAppear {
@@ -161,45 +183,38 @@ struct ContentView: View {
 
 struct RoutineCard: View {
     let routine: Routine
-    
+    var onPlay: (() -> Void)? = nil
+
     var body: some View {
-        VStack(alignment: .leading, spacing: Theme.smallPadding) {
-            HStack {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(routine.name)
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.white)
-                
-                Spacer()
-                
-                Text(routine.formattedTotalDuration)
+                Text("\(routine.tasks.count) task\(routine.tasks.count == 1 ? "" : "s") • \(routine.formattedTotalDuration)")
                     .font(.subheadline)
                     .foregroundColor(.white.opacity(0.7))
             }
-            
-            HStack {
-                Label("\(routine.streak) day streak", systemImage: "flame.fill")
-                    .font(.caption)
-                    .foregroundColor(Theme.accent)
-                
-                Spacer()
-                
-                Text("\(routine.tasks.count) tasks")
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.7))
+            Spacer()
+            Button(action: { onPlay?() }) {
+                ZStack {
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 56, height: 56)
+                    Image(systemName: "play.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 28, height: 28)
+                        .foregroundColor(.black)
+                        .offset(x: 2)
+                }
             }
+            .buttonStyle(PlainButtonStyle())
         }
         .padding()
-        .background(
-            RadialGradient(
-                gradient: Gradient(colors: [Color.white.opacity(0.05), Color.white.opacity(0.5)]),
-                center: .center,
-                startRadius: 0,
-                endRadius: 100
-            )
-        )
-        .cornerRadius(Theme.cornerRadius)
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .background(Color.white.opacity(0.2))
+        .cornerRadius(20)
     }
 }
 

@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-struct Task: Identifiable, Codable {
+struct Task: Identifiable, Codable, Equatable {
     var id = UUID()
     var name: String
     var duration: TimeInterval
@@ -16,7 +16,7 @@ struct Task: Identifiable, Codable {
     }
 }
 
-struct Routine: Identifiable, Codable {
+struct Routine: Identifiable, Codable, Equatable {
     var id = UUID()
     var name: String
     var tasks: [Task]
@@ -41,6 +41,10 @@ struct Routine: Identifiable, Codable {
         return completionDates.contains { completionDate in
             calendar.isDate(completionDate, inSameDayAs: date)
         }
+    }
+    
+    static func == (lhs: Routine, rhs: Routine) -> Bool {
+        lhs.id == rhs.id
     }
 }
 

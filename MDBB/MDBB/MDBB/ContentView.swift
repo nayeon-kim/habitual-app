@@ -15,6 +15,9 @@ struct ContentView: View {
     @State private var selectedRoutine: Routine? = nil
     @State private var showDetail = false
     @Namespace private var cardAnimation
+    @State private var showTimer = false
+    @State private var timerRoutine: Routine? = nil
+    @State private var timerCompletedTaskIndices: Set<Int> = []
     
     private func getTimeBasedGreeting() -> String {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -71,15 +74,21 @@ struct ContentView: View {
                         LazyVStack(spacing: Theme.padding) {
                             ForEach(routineStore.routines) { routine in
                                 if selectedRoutine?.id != routine.id || !showDetail {
-                                    RoutineCard(routine: routine)
-                                        .matchedGeometryEffect(id: routine.id, in: cardAnimation)
-                                        .onTapGesture {
-                                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                                                selectedRoutine = routine
-                                                showDetail = true
-                                            }
+                                    RoutineCard(routine: routine, onPlay: {
+                                        timerRoutine = routine
+                                        timerCompletedTaskIndices = []
+                                        DispatchQueue.main.async {
+                                            showTimer = true
                                         }
-                                        .transition(.scale.combined(with: .opacity))
+                                    })
+                                    .matchedGeometryEffect(id: routine.id, in: cardAnimation)
+                                    .onTapGesture {
+                                        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                                            selectedRoutine = routine
+                                            showDetail = true
+                                        }
+                                    }
+                                    .transition(.scale.combined(with: .opacity))
                                 }
                             }
                         }
@@ -117,30 +126,19 @@ struct ContentView: View {
             .sheet(isPresented: $showingAddRoutine) {
                 AddRoutineView(routineStore: routineStore)
             }
-            
-            // Full screen detail view with matched geometry effect
-            if let routine = selectedRoutine, showDetail {
-                Color.black.opacity(0.5)
-                    .ignoresSafeArea()
-                    .transition(.opacity)
-                    .zIndex(1)
-                ZStack(alignment: .topLeading) {
-                    RoutineDetailView(
+            .onChange(of: showTimer) { print("showTimer changed to \($0)") }
+            .onChange(of: timerRoutine) { print("timerRoutine changed to \(String(describing: $0?.name))") }
+            .fullScreenCover(isPresented: $showTimer) {
+                if let routine = timerRoutine {
+                    RoutineTimerView(
                         routine: routine,
-                        routineStore: routineStore,
-                        onBack: {
-                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                                showDetail = false
-                            }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                selectedRoutine = nil
-                            }
-                        }
+                        completedTaskIndices: $timerCompletedTaskIndices,
+                        onClose: { showTimer = false }
                     )
-                    .matchedGeometryEffect(id: routine.id, in: cardAnimation)
-                    .zIndex(2)
+                    .onAppear {
+                        print("RoutineTimerView for \(routine.name)")
+                    }
                 }
-                .zIndex(2)
             }
         }
         .preferredColorScheme(.dark)
@@ -163,33 +161,34 @@ struct ContentView: View {
 
 struct RoutineCard: View {
     let routine: Routine
-    
+    var onPlay: (() -> Void)? = nil
+
     var body: some View {
-        VStack(alignment: .leading, spacing: Theme.smallPadding) {
-            HStack {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(routine.name)
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.white)
-                
-                Spacer()
-                
-                Text(routine.formattedTotalDuration)
+                Text("\(routine.tasks.count) task\(routine.tasks.count == 1 ? "" : "s") • \(routine.formattedTotalDuration)")
                     .font(.subheadline)
                     .foregroundColor(.white.opacity(0.7))
             }
-            
-            HStack {
-                Label("\(routine.streak) day streak", systemImage: "flame.fill")
-                    .font(.caption)
-                    .foregroundColor(Theme.accent)
-                
-                Spacer()
-                
-                Text("\(routine.tasks.count) tasks")
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.7))
+            Spacer()
+            Button(action: { onPlay?() }) {
+                ZStack {
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 56, height: 56)
+                    Image(systemName: "play.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 28, height: 28)
+                        .foregroundColor(.black)
+                        .offset(x: 2)
+                }
             }
+            .buttonStyle(PlainButtonStyle())
         }
         .padding()
         .background(Color.white.opacity(0.2))
