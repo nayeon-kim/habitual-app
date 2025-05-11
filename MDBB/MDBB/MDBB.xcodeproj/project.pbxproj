@@ -7,9 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5B05CA8D2DD077220055B742 /* RoutineExecutionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B05CA8B2DD077220055B742 /* RoutineExecutionView.swift */; };
+		5B05CA8E2DD077220055B742 /* AddRoutineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B05CA892DD077220055B742 /* AddRoutineView.swift */; };
+		5B05CA8F2DD077220055B742 /* RoutineDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B05CA8A2DD077220055B742 /* RoutineDetailView.swift */; };
+		5B05CA912DD078910055B742 /* RoutineTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B05CA902DD078910055B742 /* RoutineTimerView.swift */; };
 		5B41FA1B2DC8A18000ACAA8E /* RoutineModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B41FA1A2DC8A18000ACAA8E /* RoutineModels.swift */; };
-		5B41FA2C2DC8A51E00ACAA8E /* AddRoutineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B41FA2A2DC8A51E00ACAA8E /* AddRoutineView.swift */; };
-		5B41FA2D2DC8A51E00ACAA8E /* RoutineExecutionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B41FA2B2DC8A51E00ACAA8E /* RoutineExecutionView.swift */; };
 		5B41FA2F2DC8A53D00ACAA8E /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B41FA2E2DC8A53D00ACAA8E /* ThemeManager.swift */; };
 		5B7C2B042DD04D4D00625C26 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B7C2B032DD04D4D00625C26 /* UIKit.framework */; platformFilter = ios; };
 		5B7F43912DC89CEC0074CE87 /* Models in Resources */ = {isa = PBXBuildFile; fileRef = 5B7FB2C42DC89A7F00217DD0 /* Models */; };
@@ -45,10 +47,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		5B05CA892DD077220055B742 /* AddRoutineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddRoutineView.swift; sourceTree = "<group>"; };
+		5B05CA8A2DD077220055B742 /* RoutineDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineDetailView.swift; sourceTree = "<group>"; };
+		5B05CA8B2DD077220055B742 /* RoutineExecutionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineExecutionView.swift; sourceTree = "<group>"; };
+		5B05CA902DD078910055B742 /* RoutineTimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineTimerView.swift; sourceTree = "<group>"; };
 		5B41FA182DC8A13800ACAA8E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		5B41FA1A2DC8A18000ACAA8E /* RoutineModels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoutineModels.swift; sourceTree = "<group>"; };
-		5B41FA2A2DC8A51E00ACAA8E /* AddRoutineView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddRoutineView.swift; sourceTree = "<group>"; };
-		5B41FA2B2DC8A51E00ACAA8E /* RoutineExecutionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoutineExecutionView.swift; sourceTree = "<group>"; };
 		5B41FA2E2DC8A53D00ACAA8E /* ThemeManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
 		5B7C2B032DD04D4D00625C26 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.4.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
 		5B7FB2922DC8967F00217DD0 /* MDBB.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MDBB.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -92,9 +96,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		5B41FA232DC8A43300ACAA8E /* Views */ = {
+		5B05CA8C2DD077220055B742 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				5B05CA902DD078910055B742 /* RoutineTimerView.swift */,
+				5B05CA892DD077220055B742 /* AddRoutineView.swift */,
+				5B05CA8A2DD077220055B742 /* RoutineDetailView.swift */,
+				5B05CA8B2DD077220055B742 /* RoutineExecutionView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -132,13 +140,11 @@
 			isa = PBXGroup;
 			children = (
 				5B41FA182DC8A13800ACAA8E /* Info.plist */,
-				5B41FA232DC8A43300ACAA8E /* Views */,
+				5B05CA8C2DD077220055B742 /* Views */,
 				5B7FB2C42DC89A7F00217DD0 /* Models */,
 				5B7FB2C32DC89A7F00217DD0 /* Preview Content */,
 				5B7FB2952DC8967F00217DD0 /* MDBBApp.swift */,
 				5B41FA2E2DC8A53D00ACAA8E /* ThemeManager.swift */,
-				5B41FA2A2DC8A51E00ACAA8E /* AddRoutineView.swift */,
-				5B41FA2B2DC8A51E00ACAA8E /* RoutineExecutionView.swift */,
 				5B7FB2972DC8967F00217DD0 /* ContentView.swift */,
 				5B41FA1A2DC8A18000ACAA8E /* RoutineModels.swift */,
 				5B7FB2992DC8968000217DD0 /* Assets.xcassets */,
@@ -310,11 +316,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				5B41FA1B2DC8A18000ACAA8E /* RoutineModels.swift in Sources */,
-				5B41FA2D2DC8A51E00ACAA8E /* RoutineExecutionView.swift in Sources */,
-				5B41FA2C2DC8A51E00ACAA8E /* AddRoutineView.swift in Sources */,
 				5B7FB2982DC8967F00217DD0 /* ContentView.swift in Sources */,
 				5B7FB2962DC8967F00217DD0 /* MDBBApp.swift in Sources */,
+				5B05CA912DD078910055B742 /* RoutineTimerView.swift in Sources */,
 				5B41FA2F2DC8A53D00ACAA8E /* ThemeManager.swift in Sources */,
+				5B05CA8D2DD077220055B742 /* RoutineExecutionView.swift in Sources */,
+				5B05CA8E2DD077220055B742 /* AddRoutineView.swift in Sources */,
+				5B05CA8F2DD077220055B742 /* RoutineDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
