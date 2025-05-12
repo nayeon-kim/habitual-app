@@ -30,90 +30,82 @@ struct RoutineDetailView: View {
     
     var body: some View {
         ZStack(alignment: .topLeading) {
-            Theme.background.ignoresSafeArea()
-            VStack {
-                VStack(alignment: .leading, spacing: 0) {
-                    // Header with back button and title
-                    HStack(spacing: 12) {
-                        if let onBack = onBack {
-                            Button(action: onBack) {
-                                Image(systemName: "arrow.left")
-                                    .font(.title2)
-                                    .foregroundColor(.white)
-                                    .padding(8)
-                                    .background(Color.black.opacity(0.5))
-                                    .clipShape(Circle())
-                            }
+            Theme.background
+                .ignoresSafeArea()
+            VStack(alignment: .leading, spacing: 0) {
+                // Header with back button and title
+                HStack(spacing: 12) {
+                    if let onBack = onBack {
+                        Button(action: onBack) {
+                            Image(systemName: "arrow.left")
+                                .font(.title2)
+                                .foregroundColor(.white)
+                                .padding(8)
+                                .background(Color.black.opacity(0.5))
+                                .clipShape(Circle())
                         }
-                        Text(routine.name)
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.7)
-                        Spacer()
                     }
-                    .padding(.top, 44)
-                    .padding(.horizontal)
-                    // Tasks List (List)
-                    List {
-                        ForEach(Array(routine.tasks.enumerated()), id: \.offset) { index, task in
-                            HStack {
-                                Button(action: {
-                                    toggleTaskCompletion(index: index)
-                                }) {
-                                    if completedTaskIndices.contains(index) {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundColor(.green)
-                                    } else {
-                                        Image(systemName: "circle")
-                                            .foregroundColor(.gray)
-                                    }
+                    Text(routine.name)
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.7)
+                    Spacer()
+                }
+                .padding(.top, 44)
+                .padding(.horizontal)
+                // Tasks List (List)
+                List {
+                    ForEach(Array(routine.tasks.enumerated()), id: \.offset) { index, task in
+                        HStack {
+                            Button(action: {
+                                toggleTaskCompletion(index: index)
+                            }) {
+                                if completedTaskIndices.contains(index) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.green)
+                                } else {
+                                    Image(systemName: "circle")
+                                        .foregroundColor(.gray)
                                 }
-                                .buttonStyle(PlainButtonStyle())
-                                Text(task.name)
-                                    .foregroundColor(.white)
-                                Spacer()
-                                Text(task.formattedDuration)
-                                    .foregroundColor(.white)
-                                    .font(.subheadline)
                             }
-                        }
-                        // Add New Task Button
-                        Button(action: { showingAddTask = true }) {
-                            HStack {
-                                Image(systemName: "plus.circle")
-                                    .foregroundColor(.white)
-                                Text("Add New Task")
-                                    .foregroundColor(.white)
-                            }
+                            .buttonStyle(PlainButtonStyle())
+                            Text(task.name)
+                                .foregroundColor(.white)
+                            Spacer()
+                            Text(task.formattedDuration)
+                                .foregroundColor(.white)
+                                .font(.subheadline)
                         }
                     }
-                    .listStyle(InsetGroupedListStyle())
-                    .background(Color.clear)
-                    .listRowBackground(Color.clear)
-                    .scrollContentBackground(.hidden)
-                    // Show current task and timer if running
-                    if isRunning, let currentTask = routine.tasks[safe: currentTaskIndex] {
-                        VStack(spacing: 8) {
-                            Text("Current Task: \(currentTask.name)")
-                                .font(.headline)
+                    // Add New Task Button
+                    Button(action: { showingAddTask = true }) {
+                        HStack {
+                            Image(systemName: "plus.circle")
                                 .foregroundColor(.white)
-                            Text(timeString(from: timeRemaining))
-                                .font(.system(size: 40, weight: .bold, design: .monospaced))
+                            Text("Add New Task")
                                 .foregroundColor(.white)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding()
                     }
                 }
-                .padding()
-                .background(Color.white.opacity(0.2))
-                .cornerRadius(20)
-                .matchedGeometryEffect(id: routine.id, in: cardAnimation)
-                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-                .padding(.horizontal, 16)
-                Spacer()
+                .listStyle(InsetGroupedListStyle())
+                .background(Color.clear)
+                .listRowBackground(Color.clear)
+                .scrollContentBackground(.hidden)
+                // Show current task and timer if running
+                if isRunning, let currentTask = routine.tasks[safe: currentTaskIndex] {
+                    VStack(spacing: 8) {
+                        Text("Current Task: \(currentTask.name)")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                        Text(timeString(from: timeRemaining))
+                            .font(.system(size: 40, weight: .bold, design: .monospaced))
+                            .foregroundColor(.white)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                }
             }
             // Floating Start Button
             VStack {
