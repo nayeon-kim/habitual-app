@@ -92,7 +92,8 @@ struct ContentView: View {
                                 .matchedGeometryEffect(id: routine.id, in: cardAnimation)
                             }
                         }
-                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 16)
                     }
                 }
                 
@@ -225,6 +226,7 @@ struct RoutineCard: View {
                 }
             }
             .padding()
+            .frame(maxWidth: .infinity)
             .background(Color.white.opacity(0.2))
             .cornerRadius(20)
             .contentShape(Rectangle())
@@ -247,87 +249,66 @@ struct RoutineCard: View {
 struct WeeklyStreakCard: View {
     let routines: [Routine]
     private let calendar = Calendar.current
-    private let weekDays = ["S", "M", "T", "W", "T", "F", "S"]
-    
+    private let weekDays = ["M", "T", "W", "T", "F", "S", "S"]
+    private let circlesWidth: CGFloat = 7 * 18
+    private let cardWidth: CGFloat = UIScreen.main.bounds.width - 32
+
     private var weekDates: [Date] {
         let today = Date()
-        return (0..<7).map { dayOffset in
-            calendar.date(byAdding: .day, value: -6 + dayOffset, to: today)!
-        }
+        let startOfWeek = calendar.date(byAdding: .day, value: -((calendar.component(.weekday, from: today) + 5) % 7), to: today)!
+        return (0..<7).map { calendar.date(byAdding: .day, value: $0, to: startOfWeek)! }
     }
-    
+
     private var dateRangeString: String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MMM d"
-        
         let startDate = weekDates.first!
         let endDate = weekDates.last!
-        
         return "\(dateFormatter.string(from: startDate)) - \(dateFormatter.string(from: endDate))"
     }
-    
+
     var body: some View {
-        VStack(alignment: .leading, spacing: Theme.smallPadding) {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(dateRangeString)
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.7))
+            Text("Weekly progress")
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(.white)
             HStack {
-                Text("Weekly Progress")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                
                 Spacer()
-                
-                Text(dateRangeString)
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.7))
+                HStack(spacing: 3) {
+                    ForEach(weekDays, id: \.self) { day in
+                        Text(day)
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.5))
+                            .frame(width: 18)
+                    }
+                }
+                .frame(width: circlesWidth + 18, alignment: .trailing)
             }
-            
-            VStack(spacing: 12) {
-                ForEach(routines) { routine in
-                    HStack(alignment: .center, spacing: 12) {
-                        Text(routine.name)
-                            .font(.subheadline)
-                            .foregroundColor(.white)
-                            .frame(width: 100, alignment: .leading)
-                            .lineLimit(1)
-                        
-                        HStack(spacing: 8) {
-                            ForEach(0..<7) { index in
-                                VStack(spacing: 4) {
-                                    if routine.wasCompletedOn(weekDates[index]) {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundColor(.green)
-                                            .font(.system(size: 24))
-                                    } else {
-                                        Circle()
-                                            .fill(
-                                                RadialGradient(
-                                                    gradient: Gradient(colors: [
-                                                        Color.white.opacity(0.05),
-                                                        Color.white.opacity(0.1)
-                                                    ]),
-                                                    center: .center,
-                                                    startRadius: 0,
-                                                    endRadius: 20
-                                                )
-                                            )
-                                            .frame(width: 24, height: 24)
-                                            .overlay(
-                                                Circle()
-                                                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
-                                            )
-                                    }
-                                    
-                                    Text(weekDays[index])
-                                        .font(.caption2)
-                                        .foregroundColor(.white.opacity(0.7))
-                                }
-                            }
+            ForEach(routines) { routine in
+                HStack {
+                    Text(routine.name)
+                        .font(.body)
+                        .foregroundColor(.white)
+                        .lineLimit(1)
+                    Spacer()
+                    HStack(spacing: 3) {
+                        ForEach(0..<7) { index in
+                            Circle()
+                                .fill(Color.white)
+                                .frame(width: 18, height: 18)
+                                .opacity(routine.wasCompletedOn(weekDates[index]) ? 1.0 : 0.3)
                         }
                     }
+                    .frame(width: circlesWidth + 18, alignment: .trailing)
                 }
             }
         }
         .padding()
+        .frame(width: cardWidth)
         .background(Color.white.opacity(0.2))
         .cornerRadius(20)
         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
