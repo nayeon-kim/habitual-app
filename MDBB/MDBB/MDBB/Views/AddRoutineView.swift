@@ -7,6 +7,7 @@ struct AddRoutineView: View {
     @State private var routineName = ""
     @State private var tasks: [Task] = []
     @State private var showingAddTask = false
+    @FocusState private var nameFieldIsFocused: Bool
     
     var body: some View {
         NavigationView {
@@ -20,6 +21,7 @@ struct AddRoutineView: View {
                         TextField("Routine Name", text: $routineName)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .padding(.horizontal)
+                            .focused($nameFieldIsFocused)
                         
                         // Tasks List
                         ForEach(tasks) { task in
@@ -62,6 +64,11 @@ struct AddRoutineView: View {
             .sheet(isPresented: $showingAddTask) {
                 AddTaskView { task in
                     tasks.append(task)
+                }
+            }
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    nameFieldIsFocused = true
                 }
             }
         }
@@ -113,6 +120,7 @@ struct AddTaskView: View {
     @State private var duration: TimeInterval = 300 // 5 minutes
     @State private var selectedIcon = "star.fill"
     @State private var selectedColor = "blue"
+    @FocusState private var taskNameFieldIsFocused: Bool
     
     let icons = ["star.fill", "heart.fill", "moon.fill", "sun.max.fill", "cloud.fill", "leaf.fill"]
     let colors = ["blue", "red", "green", "purple", "orange", "pink"]
@@ -122,6 +130,7 @@ struct AddTaskView: View {
             Form {
                 Section(header: Text("Task Details")) {
                     TextField("Task Name", text: $taskName)
+                        .focused($taskNameFieldIsFocused)
                     
                     Stepper("Duration: \(Int(duration/60)) minutes", value: $duration, in: 60...3600, step: 60)
                 }
@@ -181,6 +190,11 @@ struct AddTaskView: View {
                         dismiss()
                     }
                     .disabled(taskName.isEmpty)
+                }
+            }
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    taskNameFieldIsFocused = true
                 }
             }
         }
