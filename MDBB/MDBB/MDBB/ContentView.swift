@@ -73,23 +73,23 @@ struct ContentView: View {
                         
                         LazyVStack(spacing: Theme.padding) {
                             ForEach(routineStore.routines) { routine in
-                                if selectedRoutine?.id != routine.id || !showDetail {
-                                    RoutineCard(routine: routine, onPlay: {
+                                RoutineCard(
+                                    routine: routine,
+                                    onPlay: {
                                         timerRoutine = routine
                                         timerCompletedTaskIndices = []
                                         DispatchQueue.main.async {
                                             showTimer = true
                                         }
-                                    })
-                                    .matchedGeometryEffect(id: routine.id, in: cardAnimation)
-                                    .onTapGesture {
+                                    },
+                                    onDetail: {
                                         withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                                             selectedRoutine = routine
                                             showDetail = true
                                         }
                                     }
-                                    .transition(.scale.combined(with: .opacity))
-                                }
+                                )
+                                .matchedGeometryEffect(id: routine.id, in: cardAnimation)
                             }
                         }
                         .padding()
@@ -140,6 +140,29 @@ struct ContentView: View {
                     }
                 }
             }
+            if let routine = selectedRoutine, showDetail {
+                Color.black.opacity(0.5)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                    .zIndex(1)
+                ZStack(alignment: .topLeading) {
+                    RoutineDetailView(
+                        routine: routine,
+                        routineStore: routineStore,
+                        onBack: {
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                                showDetail = false
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                selectedRoutine = nil
+                            }
+                        }
+                    )
+                    .matchedGeometryEffect(id: routine.id, in: cardAnimation)
+                    .zIndex(2)
+                }
+                .zIndex(2)
+            }
         }
         .preferredColorScheme(.dark)
         .onAppear {
@@ -150,36 +173,49 @@ struct ContentView: View {
             timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
                 currentGreeting = getTimeBasedGreeting()
             }
+            print("selectedRoutine: \(String(describing: selectedRoutine?.name)), showDetail: \(showDetail)")
         }
         .onDisappear {
             // Clean up timer when view disappears
             timer?.invalidate()
             timer = nil
         }
+        .onChange(of: selectedRoutine) { print("selectedRoutine changed to \(String(describing: $0?.name))") }
+        .onChange(of: showDetail) { print("showDetail changed to \($0)") }
     }
 }
 
 struct RoutineCard: View {
     let routine: Routine
     var onPlay: (() -> Void)? = nil
+    var onDetail: (() -> Void)? = nil
 
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(routine.name)
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                Text("\(routine.tasks.count) task\(routine.tasks.count == 1 ? "" : "s") • \(routine.formattedTotalDuration)")
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.7))
-            }
-            Spacer()
-            Button(action: { onPlay?() }) {
+        GeometryReader { geo in
+            let playButtonSize: CGFloat = 56
+            let horizontalPadding: CGFloat = 16
+            let playButtonFrame = CGRect(
+                x: geo.size.width - playButtonSize - horizontalPadding,
+                y: (geo.size.height - playButtonSize) / 2,
+                width: playButtonSize,
+                height: playButtonSize
+            )
+
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(routine.name)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                    Text("\(routine.tasks.count) task\(routine.tasks.count == 1 ? "" : "s") • \(routine.formattedTotalDuration)")
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.7))
+                }
+                Spacer()
                 ZStack {
                     Circle()
                         .fill(Color.white)
-                        .frame(width: 56, height: 56)
+                        .frame(width: playButtonSize, height: playButtonSize)
                     Image(systemName: "play.fill")
                         .resizable()
                         .scaledToFit()
@@ -188,11 +224,23 @@ struct RoutineCard: View {
                         .offset(x: 2)
                 }
             }
-            .buttonStyle(PlainButtonStyle())
+            .padding()
+            .background(Color.white.opacity(0.2))
+            .cornerRadius(20)
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onEnded { value in
+                        let tapLocation = value.location
+                        if playButtonFrame.contains(tapLocation) {
+                            onPlay?()
+                        } else {
+                            onDetail?()
+                        }
+                    }
+            )
         }
-        .padding()
-        .background(Color.white.opacity(0.2))
-        .cornerRadius(20)
+        .frame(height: 80)
     }
 }
 

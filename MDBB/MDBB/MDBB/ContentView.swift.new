@@ -35,6 +35,7 @@ struct ContentView: View {
     }
     
     var body: some View {
+        print("selectedRoutine: \(String(describing: selectedRoutine?.name)), showDetail: \(showDetail)")
         ZStack {
             LinearGradient(
                 gradient: Gradient(colors: [
@@ -64,6 +65,7 @@ struct ContentView: View {
                         
                         LazyVStack(spacing: Theme.padding) {
                             ForEach(routineStore.routines) { routine in
+                                print("Routine in list: \(routine.name), id: \(routine.id)")
                                 if selectedRoutine?.id != routine.id || !showDetail {
                                     RoutineCard(routine: routine, onPlay: {
                                         print("Play button tapped for \(routine.name)")
@@ -81,6 +83,7 @@ struct ContentView: View {
                                     .transition(.scale.combined(with: .opacity))
                                 }
                             }
+                            print("Selected routine id: \(String(describing: selectedRoutine?.id))")
                         }
                         .padding()
                     }
@@ -126,6 +129,7 @@ struct ContentView: View {
             
             // Full screen detail view with matched geometry effect
             if let routine = selectedRoutine, showDetail {
+                print("Showing detail view for \(routine.name)")
                 Color.black.opacity(0.5)
                     .ignoresSafeArea()
                     .transition(.opacity)
