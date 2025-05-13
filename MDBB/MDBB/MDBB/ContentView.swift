@@ -127,14 +127,26 @@ struct ContentView: View {
             .sheet(isPresented: $showingAddRoutine) {
                 AddRoutineView(routineStore: routineStore)
             }
-            .onChange(of: showTimer) { print("showTimer changed to \($0)") }
-            .onChange(of: timerRoutine) { print("timerRoutine changed to \(String(describing: $0?.name))") }
+            .onChange(of: showTimer) {}
+            .onChange(of: timerRoutine) {}
             .fullScreenCover(isPresented: $showTimer) {
                 if let routine = timerRoutine {
                     RoutineTimerView(
                         routine: routine,
                         completedTaskIndices: $timerCompletedTaskIndices,
-                        onClose: { showTimer = false }
+                        onClose: { showTimer = false },
+                        onComplete: {
+                            // Mark routine as completed for today
+                            let today = Date()
+                            let calendar = Calendar.current
+                            var updatedRoutine = routine
+                            if !updatedRoutine.completionDates.contains(where: { calendar.isDate($0, inSameDayAs: today) }) {
+                                updatedRoutine.completionDates.append(today)
+                                updatedRoutine.lastCompleted = today
+                                updatedRoutine.streak += 1
+                                routineStore.updateRoutine(updatedRoutine)
+                            }
+                        }
                     )
                     .onAppear {
                         print("RoutineTimerView for \(routine.name)")
@@ -147,20 +159,22 @@ struct ContentView: View {
                     .transition(.opacity)
                     .zIndex(1)
                 ZStack(alignment: .topLeading) {
-                    RoutineDetailView(
-                        routine: routine,
-                        routineStore: routineStore,
-                        onBack: {
-                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                                showDetail = false
+                    if let latestRoutine = routineStore.routines.first(where: { $0.id == routine.id }) {
+                        RoutineDetailView(
+                            routine: latestRoutine,
+                            routineStore: routineStore,
+                            onBack: {
+                                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                                    showDetail = false
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    selectedRoutine = nil
+                                }
                             }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                selectedRoutine = nil
-                            }
-                        }
-                    )
-                    .matchedGeometryEffect(id: routine.id, in: cardAnimation)
-                    .zIndex(2)
+                        )
+                        .matchedGeometryEffect(id: routine.id, in: cardAnimation)
+                        .zIndex(2)
+                    }
                 }
                 .zIndex(2)
             }
@@ -252,6 +266,7 @@ struct WeeklyStreakCard: View {
     private let weekDays = ["M", "T", "W", "T", "F", "S", "S"]
     private let circlesWidth: CGFloat = 7 * 18
     private let cardWidth: CGFloat = UIScreen.main.bounds.width - 32
+    @State private var lastCompleted: [String: Date] = [:]
 
     private var weekDates: [Date] {
         let today = Date()
@@ -297,10 +312,22 @@ struct WeeklyStreakCard: View {
                     Spacer()
                     HStack(spacing: 3) {
                         ForEach(0..<7) { index in
+                            let completed = routine.wasCompletedOn(weekDates[index])
                             Circle()
                                 .fill(Color.white)
                                 .frame(width: 18, height: 18)
-                                .opacity(routine.wasCompletedOn(weekDates[index]) ? 1.0 : 0.3)
+                                .opacity(completed ? 1.0 : 0.3)
+                                .animation(.spring(response: 0.5, dampingFraction: 0.7), value: completed)
+                                .onChange(of: completed) { newValue in
+                                    if newValue && calendar.isDateInToday(weekDates[index]) {
+                                        let key = "\(routine.id)-\(weekDates[index])"
+                                        if lastCompleted[key] != weekDates[index] {
+                                            lastCompleted[key] = weekDates[index]
+                                            let generator = UIImpactFeedbackGenerator(style: .medium)
+                                            generator.impactOccurred()
+                                        }
+                                    }
+                                }
                         }
                     }
                     .frame(width: circlesWidth + 18, alignment: .trailing)

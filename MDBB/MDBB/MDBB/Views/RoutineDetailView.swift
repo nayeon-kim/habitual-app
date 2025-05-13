@@ -152,6 +152,34 @@ struct RoutineDetailView: View {
                 completedTaskIndices: $completedTaskIndices,
                 onClose: {
                     showingTimer = false
+                },
+                onComplete: {
+                    print("[DEBUG] onComplete called for routine: \(routine.name)")
+                    // Dismiss detail view first
+                    onBack?()
+                    // Delay the update so the home screen is visible when the value changes
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                        var updatedRoutine = routine
+                        let today = Date()
+                        let calendar = Calendar.current
+                        if !updatedRoutine.completionDates.contains(where: { calendar.isDate($0, inSameDayAs: today) }) {
+                            print("[DEBUG] Appending today to completionDates for routine: \(routine.name)")
+                            updatedRoutine.completionDates.append(today)
+                            updatedRoutine.lastCompleted = today
+                            updatedRoutine.streak += 1
+                            print("[DEBUG] Before updateRoutine: completionDates=\(updatedRoutine.completionDates), lastCompleted=\(String(describing: updatedRoutine.lastCompleted))")
+                            routineStore.updateRoutine(updatedRoutine)
+                            routine = updatedRoutine
+                            print("[DEBUG] After updateRoutine: completionDates=\(updatedRoutine.completionDates), lastCompleted=\(String(describing: updatedRoutine.lastCompleted))")
+                            // Fetch the updated routine from the store to ensure local state is in sync
+                            if let refreshed = routineStore.routines.first(where: { $0.id == routine.id }) {
+                                print("[DEBUG] Refreshed routine from store: completionDates=\(refreshed.completionDates), lastCompleted=\(String(describing: refreshed.lastCompleted))")
+                                routine = refreshed
+                            }
+                            completedTaskIndices = []
+                        }
+                        print("[DEBUG] onComplete finished for routine: \(routine.name)")
+                    }
                 }
             )
         }

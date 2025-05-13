@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-struct Task: Identifiable, Codable, Equatable {
+struct Task: Identifiable, Codable {
     var id = UUID()
     var name: String
     var duration: TimeInterval
@@ -71,6 +71,7 @@ class RoutineStore: ObservableObject {
     func updateRoutine(_ routine: Routine) {
         if let index = routines.firstIndex(where: { $0.id == routine.id }) {
             print("[DEBUG] Updating routine: \(routine.name)")
+            print("[DEBUG] updateRoutine: completionDates=\(routine.completionDates), lastCompleted=\(String(describing: routine.lastCompleted))")
             routines[index] = routine
             // saveRoutines() now handled by didSet
         }

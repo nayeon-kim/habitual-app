@@ -4,6 +4,7 @@ struct RoutineTimerView: View {
     let routine: Routine
     @Binding var completedTaskIndices: Set<Int>
     var onClose: () -> Void
+    var onComplete: (() -> Void)? = nil
     @State private var currentTaskIndex: Int = 0
     @State private var timeRemaining: TimeInterval = 0
     @State private var timer: Timer? = nil
@@ -11,6 +12,7 @@ struct RoutineTimerView: View {
     @State private var didAppear = false
     @State private var autoDismissWorkItem: DispatchWorkItem? = nil
     @State private var completionRingProgress: CGFloat = 0.0
+    @State private var didCallOnComplete = false
     
     var body: some View {
         ZStack {
@@ -159,6 +161,12 @@ struct RoutineTimerView: View {
             }
             let workItem = DispatchWorkItem {
                 withAnimation(.easeInOut(duration: 0.4)) {
+                    print("[DEBUG] Auto-dismiss workItem triggered. isComplete=\(isComplete), didCallOnComplete=\(didCallOnComplete)")
+                    if !didCallOnComplete {
+                        print("[DEBUG] Calling onComplete from auto-dismiss")
+                        didCallOnComplete = true
+                        onComplete?()
+                    }
                     onClose()
                 }
             }
