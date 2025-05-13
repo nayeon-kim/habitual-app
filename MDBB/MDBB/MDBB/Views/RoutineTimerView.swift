@@ -9,6 +9,8 @@ struct RoutineTimerView: View {
     @State private var timer: Timer? = nil
     @State private var isComplete: Bool = false
     @State private var didAppear = false
+    @State private var autoDismissWorkItem: DispatchWorkItem? = nil
+    @State private var completionRingProgress: CGFloat = 0.0
     
     var body: some View {
         ZStack {
@@ -39,14 +41,26 @@ struct RoutineTimerView: View {
                 
                 if isComplete {
                     VStack(spacing: 16) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 80))
-                            .foregroundColor(.green)
+                        ZStack {
+                            Circle()
+                                .stroke(Color.white.opacity(0.3), lineWidth: 10)
+                                .frame(width: 110, height: 110)
+                            Circle()
+                                .trim(from: 0, to: completionRingProgress)
+                                .stroke(Color.white, style: StrokeStyle(lineWidth: 10, lineCap: .round))
+                                .rotationEffect(.degrees(-90))
+                                .frame(width: 110, height: 110)
+                                .animation(.easeInOut(duration: 1), value: completionRingProgress)
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 80))
+                                .foregroundColor(.white)
+                        }
                         Text("Routine Complete!")
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
                     }
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
                 } else if let currentTask = routine.tasks[safe: currentTaskIndex] {
                     VStack(spacing: 24) {
                         Text(currentTask.name)
@@ -96,10 +110,20 @@ struct RoutineTimerView: View {
             DispatchQueue.main.async {
                 didAppear = true
             }
+            autoDismissWorkItem?.cancel()
+            if isComplete {
+                completionRingProgress = 0.0
+                DispatchQueue.main.async {
+                    withAnimation(.easeInOut(duration: 1)) {
+                        completionRingProgress = 1.0
+                    }
+                }
+            }
         }
         .onDisappear {
             timer?.invalidate()
             timer = nil
+            autoDismissWorkItem?.cancel()
         }
     }
     
@@ -127,6 +151,19 @@ struct RoutineTimerView: View {
             startTask()
         } else {
             isComplete = true
+            completionRingProgress = 0.0
+            DispatchQueue.main.async {
+                withAnimation(.easeInOut(duration: 1)) {
+                    completionRingProgress = 1.0
+                }
+            }
+            let workItem = DispatchWorkItem {
+                withAnimation(.easeInOut(duration: 0.4)) {
+                    onClose()
+                }
+            }
+            autoDismissWorkItem = workItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: workItem)
         }
     }
     
