@@ -267,6 +267,7 @@ struct WeeklyStreakCard: View {
     private let circlesWidth: CGFloat = 7 * 18
     private let cardWidth: CGFloat = UIScreen.main.bounds.width - 32
     @State private var lastCompleted: [String: Date] = [:]
+    @State private var showingSummary = false
 
     private var weekDates: [Date] {
         let today = Date()
@@ -284,13 +285,31 @@ struct WeeklyStreakCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(dateRangeString)
-                .font(.caption)
-                .foregroundColor(.white.opacity(0.7))
+            HStack {
+                Text(dateRangeString)
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.7))
+                
+                Spacer()
+                
+                Button(action: { showingSummary = true }) {
+                    HStack(spacing: 8) {
+                        Text("View All")
+                            .font(.subheadline)
+                            .foregroundColor(.white)
+                        
+                        Image(systemName: "chevron.right")
+                            .font(.subheadline)
+                            .foregroundColor(.white)
+                    }
+                }
+            }
+            
             Text("Weekly progress")
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(.white)
+            
             HStack {
                 Spacer()
                 HStack(spacing: 3) {
@@ -339,6 +358,9 @@ struct WeeklyStreakCard: View {
         .background(Color.white.opacity(0.2))
         .cornerRadius(20)
         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .sheet(isPresented: $showingSummary) {
+            SummaryView()
+        }
     }
 }
 

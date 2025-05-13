@@ -27,6 +27,7 @@
 		5B7FB2B42DC8968000217DD0 /* MDBBUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B7FB2B32DC8968000217DD0 /* MDBBUITestsLaunchTests.swift */; };
 		5B7FB2C62DC89A7F00217DD0 /* Preview Content in Resources */ = {isa = PBXBuildFile; fileRef = 5B7FB2C32DC89A7F00217DD0 /* Preview Content */; };
 		5B7FB2C72DC89A7F00217DD0 /* Models in Resources */ = {isa = PBXBuildFile; fileRef = 5B7FB2C42DC89A7F00217DD0 /* Models */; };
+		5BD79B482DD3246F000EF8F1 /* SummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BD79B462DD3246F000EF8F1 /* SummaryView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,6 +69,7 @@
 		5B7FB2B32DC8968000217DD0 /* MDBBUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDBBUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		5B7FB2C32DC89A7F00217DD0 /* Preview Content */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "Preview Content"; sourceTree = "<group>"; };
 		5B7FB2C42DC89A7F00217DD0 /* Models */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Models; sourceTree = "<group>"; };
+		5BD79B462DD3246F000EF8F1 /* SummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +105,7 @@
 				5B05CA892DD077220055B742 /* AddRoutineView.swift */,
 				5B05CA8A2DD077220055B742 /* RoutineDetailView.swift */,
 				5B05CA8B2DD077220055B742 /* RoutineExecutionView.swift */,
+				5BD79B462DD3246F000EF8F1 /* SummaryView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -318,6 +321,7 @@
 				5B41FA1B2DC8A18000ACAA8E /* RoutineModels.swift in Sources */,
 				5B7FB2982DC8967F00217DD0 /* ContentView.swift in Sources */,
 				5B7FB2962DC8967F00217DD0 /* MDBBApp.swift in Sources */,
+				5BD79B482DD3246F000EF8F1 /* SummaryView.swift in Sources */,
 				5B05CA912DD078910055B742 /* RoutineTimerView.swift in Sources */,
 				5B41FA2F2DC8A53D00ACAA8E /* ThemeManager.swift in Sources */,
 				5B05CA8D2DD077220055B742 /* RoutineExecutionView.swift in Sources */,

@@ -57,6 +57,26 @@ class RoutineStore: ObservableObject {
     
     private let routinesFile = "routines.json"
     
+    var currentStreak: Int {
+        routines.map { $0.streak }.max() ?? 0
+    }
+    
+    var bestStreak: Int {
+        routines.map { $0.streak }.max() ?? 0
+    }
+    
+    var completionRate: Double {
+        let totalCompletions = routines.reduce(0) { $0 + $1.completionDates.count }
+        let totalPossible = routines.count * 7 // Assuming we track 7 days
+        return totalPossible > 0 ? Double(totalCompletions) / Double(totalPossible) : 0
+    }
+    
+    func isRoutineCompleted(for date: Date) -> Bool {
+        routines.contains { routine in
+            routine.wasCompletedOn(date)
+        }
+    }
+    
     init() {
         loadRoutines()
     }
