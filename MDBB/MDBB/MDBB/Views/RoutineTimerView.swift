@@ -26,7 +26,16 @@ struct RoutineTimerView: View {
             
             VStack(spacing: 32) {
                 HStack {
-                    Button(action: onClose) {
+                    Button(action: {
+                        print("[DEBUG] Close button tapped. isComplete=\(isComplete), didCallOnComplete=\(didCallOnComplete)")
+                        if isComplete && !didCallOnComplete {
+                            print("[DEBUG] Calling onComplete from close button")
+                            didCallOnComplete = true
+                            onComplete?()
+                        }
+                        print("[DEBUG] Calling onClose from close button")
+                        onClose()
+                    }) {
                         Image(systemName: "xmark")
                             .font(.title)
                             .foregroundColor(.white)
