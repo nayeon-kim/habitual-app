@@ -11,6 +11,7 @@ struct RoutineDetailView: View {
     @State private var timer: Timer? = nil
     @State private var showingTimer = false
     @State private var completedTaskIndices: Set<Int> = []
+    @State private var showingEditRoutine = false
     var onBack: (() -> Void)? = nil
     
     private var shouldResetCompletionState: Bool {
@@ -52,6 +53,11 @@ struct RoutineDetailView: View {
                         .lineLimit(2)
                         .minimumScaleFactor(0.7)
                     Spacer()
+                    Button(action: { showingEditRoutine = true }) {
+                        Image(systemName: "pencil.circle.fill")
+                            .font(.system(size: 28, weight: .bold))
+                            .foregroundColor(.white)
+                    }
                 }
                 .padding(.top, 44)
                 .padding(.horizontal)
@@ -148,6 +154,9 @@ struct RoutineDetailView: View {
                 }
             )
         }
+        .sheet(isPresented: $showingEditRoutine) {
+            EditRoutineView(routine: $routine, routineStore: routineStore)
+        }
         .onAppear {
             UITableView.appearance().backgroundColor = .clear
             loadCompletionState()
@@ -181,5 +190,125 @@ struct RoutineDetailView: View {
         let minutes = Int(timeInterval) / 60
         let seconds = Int(timeInterval) % 60
         return String(format: "%02d:%02d", minutes, seconds)
+    }
+}
+
+struct EditRoutineView: View {
+    @Binding var routine: Routine
+    @ObservedObject var routineStore: RoutineStore
+    @Environment(\.dismiss) private var dismiss
+    @FocusState private var nameFieldIsFocused: Bool
+    @State private var editedName: String = ""
+    @State private var editedTasks: [Task] = []
+    @State private var editingTaskIndex: Int? = nil
+    @State private var editingTaskName: String = ""
+    @State private var editingTaskDuration: TimeInterval = 300
+    @State private var showDeleteAlert = false
+    var onDelete: (() -> Void)? = nil
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Routine Name")) {
+                    TextField("Routine Name", text: $editedName)
+                        .focused($nameFieldIsFocused)
+                }
+                Section(header: Text("Tasks")) {
+                    ForEach(Array(editedTasks.enumerated()), id: \.element.id) { idx, task in
+                        if editingTaskIndex == idx {
+                            VStack(alignment: .leading, spacing: 8) {
+                                TextField("Task Name", text: $editingTaskName)
+                                Stepper("Duration: \(Int(editingTaskDuration/60)) min", value: $editingTaskDuration, in: 60...3600, step: 60)
+                                HStack {
+                                    Button("Save") {
+                                        var updated = task
+                                        updated.name = editingTaskName
+                                        updated.duration = editingTaskDuration
+                                        editedTasks[idx] = updated
+                                        editingTaskIndex = nil
+                                    }
+                                    .buttonStyle(.borderedProminent)
+                                    Button("Cancel") {
+                                        editingTaskIndex = nil
+                                    }
+                                    .buttonStyle(.bordered)
+                                }
+                            }
+                        } else {
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    Text(task.name)
+                                    Text("\(Int(task.duration/60)) min")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                Spacer()
+                                Button(action: {
+                                    editingTaskIndex = idx
+                                    editingTaskName = task.name
+                                    editingTaskDuration = task.duration
+                                }) {
+                                    Image(systemName: "pencil")
+                                }
+                                .buttonStyle(.plain)
+                                Button(action: {
+                                    editedTasks.remove(at: idx)
+                                }) {
+                                    Image(systemName: "trash")
+                                        .foregroundColor(.red)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
+                }
+                Section {
+                    Button(role: .destructive) {
+                        showDeleteAlert = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "trash")
+                            Text("Delete Routine")
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
+                }
+            }
+            .navigationTitle("Edit Routine")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Save") {
+                        routine.name = editedName
+                        routine.tasks = editedTasks
+                        routineStore.updateRoutine(routine)
+                        dismiss()
+                    }
+                    .disabled(editedName.isEmpty || editedTasks.isEmpty)
+                }
+            }
+            .onAppear {
+                editedName = routine.name
+                editedTasks = routine.tasks
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    nameFieldIsFocused = true
+                }
+            }
+            .alert(isPresented: $showDeleteAlert) {
+                Alert(
+                    title: Text("Delete Routine?"),
+                    message: Text("Are you sure you want to delete \(routine.name)?"),
+                    primaryButton: .destructive(Text("Delete")) {
+                        routineStore.deleteRoutine(routine)
+                        dismiss()
+                        onDelete?()
+                    },
+                    secondaryButton: .cancel()
+                )
+            }
+        }
     }
 } 
