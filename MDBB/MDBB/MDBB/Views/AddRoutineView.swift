@@ -24,8 +24,16 @@ struct AddRoutineView: View {
                             .focused($nameFieldIsFocused)
                         
                         // Tasks List
-                        ForEach(tasks) { task in
-                            TaskRow(task: task)
+                        ForEach(Array(tasks.enumerated()), id: \.element.id) { idx, task in
+                            HStack {
+                                Image(systemName: "line.3.horizontal")
+                                    .foregroundColor(.gray)
+                                    .padding(.trailing, 4)
+                                TaskRow(task: task)
+                            }
+                        }
+                        .onMove { indices, newOffset in
+                            tasks.move(fromOffsets: indices, toOffset: newOffset)
                         }
                         
                         // Add Task Button
@@ -54,7 +62,8 @@ struct AddRoutineView: View {
                     }
                 }
                 
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    EditButton()
                     Button("Save") {
                         saveRoutine()
                     }

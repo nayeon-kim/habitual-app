@@ -66,9 +66,6 @@ struct RoutineDetailView: View {
                 List {
                     ForEach(Array(routine.tasks.enumerated()), id: \.element.id) { index, task in
                         HStack {
-                            Image(systemName: "line.3.horizontal")
-                                .foregroundColor(.gray)
-                                .padding(.trailing, 4)
                             Button(action: {
                                 toggleTaskCompletion(index: index)
                             }) {
@@ -88,12 +85,6 @@ struct RoutineDetailView: View {
                                 .foregroundColor(.white)
                                 .font(.subheadline)
                         }
-                    }
-                    .onMove { indices, newOffset in
-                        var updated = routine
-                        updated.tasks.move(fromOffsets: indices, toOffset: newOffset)
-                        routine = updated
-                        routineStore.updateRoutine(updated)
                     }
                     // Add New Task Button
                     Button(action: { showingAddTask = true }) {
@@ -165,7 +156,15 @@ struct RoutineDetailView: View {
             )
         }
         .sheet(isPresented: $showingEditRoutine) {
-            EditRoutineView(routine: $routine, routineStore: routineStore)
+            EditRoutineView(
+                routine: $routine,
+                routineStore: routineStore,
+                onSave: {
+                    if let refreshed = routineStore.routines.first(where: { $0.id == routine.id }) {
+                        routine = refreshed
+                    }
+                }
+            )
         }
         .onAppear {
             UITableView.appearance().backgroundColor = .clear
@@ -220,6 +219,7 @@ struct EditRoutineView: View {
     @State private var showDeleteAlert = false
     @Environment(\.editMode) private var editMode
     var onDelete: (() -> Void)? = nil
+    var onSave: (() -> Void)? = nil
 
     var body: some View {
         NavigationView {
@@ -306,6 +306,7 @@ struct EditRoutineView: View {
                         routine.name = editedName
                         routine.tasks = editedTasks
                         routineStore.updateRoutine(routine)
+                        onSave?()
                         dismiss()
                     }
                     .disabled(editedName.isEmpty || editedTasks.isEmpty)
