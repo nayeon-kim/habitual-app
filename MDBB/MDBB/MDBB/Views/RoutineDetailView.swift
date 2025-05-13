@@ -12,6 +12,7 @@ struct RoutineDetailView: View {
     @State private var showingTimer = false
     @State private var completedTaskIndices: Set<Int> = []
     @State private var showingEditRoutine = false
+    @Environment(\.editMode) private var editMode
     var onBack: (() -> Void)? = nil
     
     private var shouldResetCompletionState: Bool {
@@ -63,8 +64,11 @@ struct RoutineDetailView: View {
                 .padding(.horizontal)
                 // Tasks List (List)
                 List {
-                    ForEach(Array(routine.tasks.enumerated()), id: \.offset) { index, task in
+                    ForEach(Array(routine.tasks.enumerated()), id: \.element.id) { index, task in
                         HStack {
+                            Image(systemName: "line.3.horizontal")
+                                .foregroundColor(.gray)
+                                .padding(.trailing, 4)
                             Button(action: {
                                 toggleTaskCompletion(index: index)
                             }) {
@@ -84,6 +88,12 @@ struct RoutineDetailView: View {
                                 .foregroundColor(.white)
                                 .font(.subheadline)
                         }
+                    }
+                    .onMove { indices, newOffset in
+                        var updated = routine
+                        updated.tasks.move(fromOffsets: indices, toOffset: newOffset)
+                        routine = updated
+                        routineStore.updateRoutine(updated)
                     }
                     // Add New Task Button
                     Button(action: { showingAddTask = true }) {
@@ -166,6 +176,10 @@ struct RoutineDetailView: View {
             timer?.invalidate()
             timer = nil
         }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            // No EditButton; drag handles are always visible
+        }
     }
     
     private func toggleTaskCompletion(index: Int) {
@@ -204,6 +218,7 @@ struct EditRoutineView: View {
     @State private var editingTaskName: String = ""
     @State private var editingTaskDuration: TimeInterval = 300
     @State private var showDeleteAlert = false
+    @Environment(\.editMode) private var editMode
     var onDelete: (() -> Void)? = nil
 
     var body: some View {
@@ -236,6 +251,9 @@ struct EditRoutineView: View {
                             }
                         } else {
                             HStack {
+                                Image(systemName: "line.3.horizontal")
+                                    .foregroundColor(.gray)
+                                    .padding(.trailing, 4)
                                 VStack(alignment: .leading) {
                                     Text(task.name)
                                     Text("\(Int(task.duration/60)) min")
@@ -260,6 +278,9 @@ struct EditRoutineView: View {
                                 .buttonStyle(.plain)
                             }
                         }
+                    }
+                    .onMove { indices, newOffset in
+                        editedTasks.move(fromOffsets: indices, toOffset: newOffset)
                     }
                 }
                 Section {
