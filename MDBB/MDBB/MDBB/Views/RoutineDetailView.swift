@@ -194,7 +194,8 @@ struct RoutineDetailView: View {
                     if let refreshed = routineStore.routines.first(where: { $0.id == routine.id }) {
                         routine = refreshed
                     }
-                }
+                },
+                isCreation: false
             )
         }
         .onAppear {
@@ -248,9 +249,11 @@ struct EditRoutineView: View {
     @State private var editingTaskName: String = ""
     @State private var editingTaskDuration: TimeInterval = 300
     @State private var showDeleteAlert = false
+    @State private var showingAddTask = false
     @Environment(\.editMode) private var editMode
     var onDelete: (() -> Void)? = nil
     var onSave: (() -> Void)? = nil
+    var isCreation: Bool = false
 
     var body: some View {
         NavigationView {
@@ -314,20 +317,30 @@ struct EditRoutineView: View {
                     .onMove { indices, newOffset in
                         editedTasks.move(fromOffsets: indices, toOffset: newOffset)
                     }
-                }
-                Section {
-                    Button(role: .destructive) {
-                        showDeleteAlert = true
-                    } label: {
+                    Button(action: { showingAddTask = true }) {
                         HStack {
-                            Image(systemName: "trash")
-                            Text("Delete Routine")
+                            Image(systemName: "plus.circle")
+                                .foregroundColor(.accentColor)
+                            Text("Add New Task")
+                                .foregroundColor(.accentColor)
                         }
                     }
-                    .frame(maxWidth: .infinity, alignment: .center)
+                }
+                if !isCreation {
+                    Section {
+                        Button(role: .destructive) {
+                            showDeleteAlert = true
+                        } label: {
+                            HStack {
+                                Image(systemName: "trash")
+                                Text("Delete Routine")
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .center)
+                    }
                 }
             }
-            .navigationTitle("Edit Routine")
+            .navigationTitle(isCreation ? "New Routine" : "Edit Routine")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -349,6 +362,11 @@ struct EditRoutineView: View {
                 editedTasks = routine.tasks
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     nameFieldIsFocused = true
+                }
+            }
+            .sheet(isPresented: $showingAddTask) {
+                AddTaskView { task in
+                    editedTasks.append(task)
                 }
             }
             .alert(isPresented: $showDeleteAlert) {

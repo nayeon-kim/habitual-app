@@ -3,97 +3,26 @@ import SwiftUI
 struct AddRoutineView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var routineStore: RoutineStore
-    
-    @State private var routineName = ""
-    @State private var tasks: [Task] = []
-    @State private var showingAddTask = false
-    @FocusState private var nameFieldIsFocused: Bool
+    @State private var routine = Routine(
+        name: "",
+        tasks: [],
+        streak: 0,
+        lastCompleted: nil,
+        createdAt: Date(),
+        isActive: true
+    )
     
     var body: some View {
-        NavigationView {
-            ZStack {
-                Theme.background
-                    .ignoresSafeArea()
-                
-                ScrollView {
-                    VStack(spacing: Theme.padding) {
-                        // Routine Name
-                        TextField("Routine Name", text: $routineName)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding(.horizontal)
-                            .focused($nameFieldIsFocused)
-                        
-                        // Tasks List
-                        ForEach(Array(tasks.enumerated()), id: \.element.id) { idx, task in
-                            HStack {
-                                Image(systemName: "line.3.horizontal")
-                                    .foregroundColor(.gray)
-                                    .padding(.trailing, 4)
-                                TaskRow(task: task)
-                            }
-                        }
-                        .onMove { indices, newOffset in
-                            tasks.move(fromOffsets: indices, toOffset: newOffset)
-                        }
-                        
-                        // Add Task Button
-                        Button(action: { showingAddTask = true }) {
-                            HStack {
-                                Image(systemName: "plus.circle.fill")
-                                Text("Add Task")
-                            }
-                            .foregroundColor(Theme.accent)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Theme.surface)
-                            .cornerRadius(Theme.cornerRadius)
-                        }
-                        .padding(.horizontal)
-                    }
-                    .padding(.vertical)
-                }
-            }
-            .navigationTitle("New Routine")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-                
-                ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    EditButton()
-                    Button("Save") {
-                        saveRoutine()
-                    }
-                    .disabled(routineName.isEmpty || tasks.isEmpty)
-                }
-            }
-            .sheet(isPresented: $showingAddTask) {
-                AddTaskView { task in
-                    tasks.append(task)
-                }
-            }
-            .onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    nameFieldIsFocused = true
-                }
-            }
-        }
-    }
-    
-    private func saveRoutine() {
-        let routine = Routine(
-            name: routineName,
-            tasks: tasks,
-            streak: 0,
-            lastCompleted: nil,
-            createdAt: Date(),
-            isActive: true
+        EditRoutineView(
+            routine: $routine,
+            routineStore: routineStore,
+            onDelete: {}, // Hide delete button in creation mode
+            onSave: {
+                routineStore.addRoutine(routine)
+                dismiss()
+            },
+            isCreation: true
         )
-        routineStore.addRoutine(routine)
-        dismiss()
     }
 }
 
