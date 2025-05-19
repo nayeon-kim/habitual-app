@@ -27,120 +27,132 @@ struct RoutineTimerView: View {
             LinearGradient(
                 gradient: Gradient(colors: [Color.purple, Color.black]),
                 startPoint: .top,
-                endPoint: .bottom
+                endPoint: .center
             )
             .ignoresSafeArea()
             
-            VStack(spacing: 32) {
-                HStack {
-                    Button(action: {
-                        let generator = UIImpactFeedbackGenerator(style: .medium)
-                        generator.prepare()
-                        generator.impactOccurred()
-                        print("[DEBUG] Close button tapped. isComplete=\(isComplete), didCallOnComplete=\(didCallOnComplete)")
-                        if isComplete && !didCallOnComplete {
-                            print("[DEBUG] Calling onComplete from close button")
-                            didCallOnComplete = true
-                            onComplete?()
+            VStack(spacing: 24) {
+                VStack(spacing: 24) {
+                    HStack {
+                        Button(action: {
+                            let generator = UIImpactFeedbackGenerator(style: .medium)
+                            generator.prepare()
+                            generator.impactOccurred()
+                            print("[DEBUG] Close button tapped. isComplete=\(isComplete), didCallOnComplete=\(didCallOnComplete)")
+                            if isComplete && !didCallOnComplete {
+                                print("[DEBUG] Calling onComplete from close button")
+                                didCallOnComplete = true
+                                onComplete?()
+                            }
+                            print("[DEBUG] Calling onClose from close button")
+                            onClose()
+                        }) {
+                            Image(systemName: "xmark")
+                                .font(.title)
+                                .foregroundColor(.white)
+                                .padding(12)
+                                .background(Color.black.opacity(0.5))
+                                .clipShape(Circle())
                         }
-                        print("[DEBUG] Calling onClose from close button")
-                        onClose()
-                    }) {
-                        Image(systemName: "xmark")
-                            .font(.title)
-                            .foregroundColor(.white)
-                            .padding(12)
-                            .background(Color.black.opacity(0.5))
-                            .clipShape(Circle())
+                        Spacer()
                     }
+                    .padding(.top, 32)
+                    .padding(.horizontal, 0)
+                    
+                    Spacer()
+                    
+                    if isComplete {
+                        VStack(spacing: 16) {
+                            ZStack {
+                                Circle()
+                                    .stroke(Color.white.opacity(0.3), lineWidth: 10)
+                                    .frame(width: 110, height: 110)
+                                Circle()
+                                    .trim(from: 0, to: completionRingProgress)
+                                    .stroke(Color.white, style: StrokeStyle(lineWidth: 10, lineCap: .round))
+                                    .rotationEffect(.degrees(-90))
+                                    .frame(width: 110, height: 110)
+                                    .animation(.easeInOut(duration: 1), value: completionRingProgress)
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.system(size: 80))
+                                    .foregroundColor(.white)
+                            }
+                            Text("Routine Complete!")
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                        }
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    } else if let currentTask = routine.tasks[safe: currentTaskIndex] {
+                        VStack(spacing: 8) {
+                            Spacer(minLength: 0)
+                            Text(currentTask.name)
+                                .font(.system(size: 32, weight: .bold))
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .multilineTextAlignment(.center)
+                            if let nextTask = nextTask {
+                                HStack(spacing: 8) {
+                                    Text("Up Next: \(nextTask.name) (\(nextTask.formattedDuration))")
+                                        .font(.title3)
+                                        .foregroundColor(.white.opacity(0.5))
+                                        .multilineTextAlignment(.center)
+                                }
+                                .frame(maxWidth: .infinity)
+                            } else {
+                                Text("Last task!")
+                                    .font(.title3)
+                                    .foregroundColor(.white.opacity(0.5))
+                                    .multilineTextAlignment(.center)
+                                    .frame(maxWidth: .infinity)
+                            }
+                            Spacer().frame(height: 24)
+                            ZStack {
+                                Circle()
+                                    .stroke(Color.white.opacity(0.2), lineWidth: 16)
+                                    .frame(width: 200, height: 200)
+                                Circle()
+                                    .trim(from: 0, to: CGFloat(timeRemaining / max(currentTask.duration, 1)))
+                                    .stroke(Color.habitualGreen, style: StrokeStyle(lineWidth: 16, lineCap: .round))
+                                    .rotationEffect(.degrees(-90))
+                                    .frame(width: 200, height: 200)
+                                    .animation(didAppear ? .linear(duration: 1) : nil, value: timeRemaining)
+                                Text(timeString(from: timeRemaining))
+                                    .font(.system(size: 48, weight: .bold, design: .monospaced))
+                                    .foregroundColor(.white)
+                                    .multilineTextAlignment(.center)
+                                    .frame(maxWidth: .infinity)
+                            }
+                            Spacer().frame(height: 24)
+                            HStack(spacing: 0) {
+                                Button(action: {
+                                    markTaskDoneAndNext()
+                                }) {
+                                    HStack {
+                                        Image(systemName: completedTaskIndices.contains(currentTaskIndex) ? "checkmark.circle.fill" : "circle")
+                                            .font(.system(size: 28))
+                                            .foregroundColor(completedTaskIndices.contains(currentTaskIndex) ? Color.white : .white.opacity(0.7))
+                                        Text(completedTaskIndices.contains(currentTaskIndex) ? "Done" : "Mark as done")
+                                            .font(.title2)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(.white.opacity(0.7))
+                                            .multilineTextAlignment(.center)
+                                    }
+                                    .padding(.vertical, 16)
+                                    .padding(.horizontal, 16)
+                                    .background(Color.white.opacity(0.1))
+                                    .cornerRadius(12)
+                                }
+                                .frame(maxWidth: .infinity, minHeight: 56)
+                            }
+                            Spacer(minLength: 0)
+                        }
+                        .frame(maxHeight: .infinity)
+                    }
+                    
                     Spacer()
                 }
-                .padding(.top, 44)
-                .padding(.horizontal)
-                
-                Spacer()
-                
-                if isComplete {
-                    VStack(spacing: 16) {
-                        ZStack {
-                            Circle()
-                                .stroke(Color.white.opacity(0.3), lineWidth: 10)
-                                .frame(width: 110, height: 110)
-                            Circle()
-                                .trim(from: 0, to: completionRingProgress)
-                                .stroke(Color.white, style: StrokeStyle(lineWidth: 10, lineCap: .round))
-                                .rotationEffect(.degrees(-90))
-                                .frame(width: 110, height: 110)
-                                .animation(.easeInOut(duration: 1), value: completionRingProgress)
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 80))
-                                .foregroundColor(.white)
-                        }
-                        Text("Routine Complete!")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                    }
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                } else if let currentTask = routine.tasks[safe: currentTaskIndex] {
-                    VStack(spacing: 8) {
-                        Spacer(minLength: 0)
-                        Text(currentTask.name)
-                            .font(.system(size: 32, weight: .bold))
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                        if let nextTask = nextTask {
-                            HStack(spacing: 8) {
-                                Text("Up Next: \(nextTask.name)")
-                                    .font(.title2)
-                                    .foregroundColor(.white.opacity(0.7))
-                                Text(nextTask.formattedDuration)
-                                    .font(.title2)
-                                    .foregroundColor(.white.opacity(0.5))
-                            }
-                        }
-                        Spacer().frame(height: 24)
-                        ZStack {
-                            Circle()
-                                .stroke(Color.white.opacity(0.2), lineWidth: 16)
-                                .frame(width: 200, height: 200)
-                            Circle()
-                                .trim(from: 0, to: CGFloat(timeRemaining / max(currentTask.duration, 1)))
-                                .stroke(Color(hex: "#C2FF5D"), style: StrokeStyle(lineWidth: 16, lineCap: .round))
-                                .rotationEffect(.degrees(-90))
-                                .frame(width: 200, height: 200)
-                                .animation(didAppear ? .linear(duration: 1) : nil, value: timeRemaining)
-                            Text(timeString(from: timeRemaining))
-                                .font(.system(size: 48, weight: .bold, design: .monospaced))
-                                .foregroundColor(.white)
-                        }
-                        Spacer().frame(height: 24)
-                        HStack(spacing: 0) {
-                            Button(action: {
-                                markTaskDoneAndNext()
-                            }) {
-                                HStack {
-                                    Image(systemName: completedTaskIndices.contains(currentTaskIndex) ? "checkmark.circle.fill" : "circle")
-                                        .font(.system(size: 28))
-                                        .foregroundColor(completedTaskIndices.contains(currentTaskIndex) ? Color(hex: "#C2FF5D") : .white.opacity(0.7))
-                                    Text(completedTaskIndices.contains(currentTaskIndex) ? "Done" : "Mark as done")
-                                        .font(.title2)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(.white.opacity(0.7))
-                                }
-                                .padding(.vertical, 16)
-                                .padding(.horizontal, 16)
-                                .background(Color.white.opacity(0.1))
-                                .cornerRadius(12)
-                            }
-                            .frame(maxWidth: .infinity, minHeight: 56)
-                        }
-                        Spacer(minLength: 0)
-                    }
-                    .frame(maxHeight: .infinity)
-                }
-                
-                Spacer()
+                .padding(.horizontal, 16)
             }
         }
         .onAppear {
@@ -241,7 +253,9 @@ struct RoutineTimerView: View {
     }
 }
 
+#if !HABITUAL_COLOR_EXTENSION
 extension Color {
+    static let habitualGreen = Color(hex: "#C2FF5D")
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         var int: UInt64 = 0
@@ -265,4 +279,5 @@ extension Color {
             opacity: Double(a) / 255
         )
     }
-} 
+}
+#endif 

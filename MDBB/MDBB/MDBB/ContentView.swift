@@ -23,9 +23,9 @@ struct ContentView: View {
         let hour = Calendar.current.component(.hour, from: Date())
         
         switch hour {
-        case 0..<12:
+        case 4..<13:
             return "🌞Good Morning"
-        case 12..<17:
+        case 13..<17:
             return "Good Afternoon"
         case 17..<22:
             return "Good Evening"
@@ -65,6 +65,17 @@ struct ContentView: View {
                     .padding(.bottom, 24)
                 
                 ScrollView {
+                    // Subheader
+                    HStack {
+                        Text("Weekly progress")
+                            .font(.headline)
+                            .foregroundColor(.white.opacity(0.8))
+                            .padding(.leading, 20)
+                            .padding(.top, 8)
+                            .padding(.bottom, 8)
+                        Spacer()
+                    }
+                    
                     VStack(spacing: Theme.padding) {
                         if !routineStore.routines.isEmpty {
                             WeeklyStreakCard(routines: routineStore.routines)
@@ -298,11 +309,10 @@ struct WeeklyStreakCard: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Text(dateRangeString)
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.7))
-                
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
                 Spacer()
-                
                 Button(action: { showingSummary = true }) {
                     HStack(spacing: 8) {
                         Text("View All")
@@ -315,11 +325,7 @@ struct WeeklyStreakCard: View {
                     }
                 }
             }
-            
-            Text("Weekly progress")
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
+            .padding(.bottom, 8)
             
             HStack {
                 Spacer()

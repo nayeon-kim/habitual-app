@@ -43,8 +43,8 @@ struct RoutineDetailView: View {
                             Image(systemName: "arrow.left")
                                 .font(.title2)
                                 .foregroundColor(.white)
-                                .padding(8)
-                                .background(Color.black.opacity(0.5))
+                                .padding(12)
+                                .background(Color.white.opacity(0.2))
                                 .clipShape(Circle())
                         }
                     }
@@ -56,9 +56,12 @@ struct RoutineDetailView: View {
                         .minimumScaleFactor(0.7)
                     Spacer()
                     Button(action: { showingEditRoutine = true }) {
-                        Image(systemName: "pencil.circle.fill")
-                            .font(.system(size: 28, weight: .bold))
+                        Image(systemName: "pencil")
+                            .font(.title2)
                             .foregroundColor(.white)
+                            .padding(12)
+                            .background(Color.white.opacity(0.2))
+                            .clipShape(Circle())
                     }
                 }
                 .padding(.top, 44)
@@ -72,7 +75,7 @@ struct RoutineDetailView: View {
                             }) {
                                 if completedTaskIndices.contains(index) {
                                     Image(systemName: "checkmark.circle.fill")
-                                        .foregroundColor(.green)
+                                        .foregroundColor(Color.habitualGreen)
                                         .font(.system(size: 28))
                                 } else {
                                     Image(systemName: "circle")
@@ -88,6 +91,7 @@ struct RoutineDetailView: View {
                                 .foregroundColor(.white)
                                 .font(.subheadline)
                         }
+                        .padding(.vertical, 2)
                     }
                     // Add New Task Button
                     Button(action: { showingAddTask = true }) {

@@ -67,12 +67,16 @@ struct SummaryView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 24) {
+                    // Add horizontal padding to all content
                     // Week Navigation
                     HStack {
                         Button(action: { selectedWeekOffset -= 1 }) {
                             Image(systemName: "chevron.left")
                                 .font(.title2)
-                                .foregroundColor(.primary)
+                                .foregroundColor(.white)
+                                .padding(12)
+                                .background(Color.white.opacity(0.2))
+                                .clipShape(Circle())
                         }
                         
                         Spacer()
@@ -85,7 +89,10 @@ struct SummaryView: View {
                         Button(action: { selectedWeekOffset += 1 }) {
                             Image(systemName: "chevron.right")
                                 .font(.title2)
-                                .foregroundColor(.primary)
+                                .foregroundColor(.white)
+                                .padding(12)
+                                .background(Color.white.opacity(0.2))
+                                .clipShape(Circle())
                         }
                         .disabled(selectedWeekOffset >= 0)
                     }
@@ -112,6 +119,7 @@ struct SummaryView: View {
                     .padding(.horizontal)
                 }
                 .padding(.vertical)
+                .padding(.horizontal, 16)
             }
             .navigationTitle("Weekly Summary")
             .navigationBarTitleDisplayMode(.inline)
