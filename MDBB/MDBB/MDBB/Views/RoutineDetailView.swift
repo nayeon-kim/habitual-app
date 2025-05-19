@@ -187,6 +187,9 @@ struct RoutineDetailView: View {
             EditRoutineView(
                 routine: $routine,
                 routineStore: routineStore,
+                onDelete: {
+                    onBack?()
+                },
                 onSave: {
                     if let refreshed = routineStore.routines.first(where: { $0.id == routine.id }) {
                         routine = refreshed
@@ -256,6 +259,7 @@ struct EditRoutineView: View {
                     TextField("Routine Name", text: $editedName)
                         .focused($nameFieldIsFocused)
                 }
+                
                 Section(header: Text("Tasks")) {
                     ForEach(Array(editedTasks.enumerated()), id: \.element.id) { idx, task in
                         if editingTaskIndex == idx {
@@ -353,8 +357,8 @@ struct EditRoutineView: View {
                     message: Text("Are you sure you want to delete \(routine.name)?"),
                     primaryButton: .destructive(Text("Delete")) {
                         routineStore.deleteRoutine(routine)
-                        dismiss()
                         onDelete?()
+                        dismiss()
                     },
                     secondaryButton: .cancel()
                 )
