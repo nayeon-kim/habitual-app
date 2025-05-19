@@ -24,13 +24,13 @@ struct ContentView: View {
         
         switch hour {
         case 0..<12:
-            return "Good Morning"
+            return "🌞Good Morning"
         case 12..<17:
             return "Good Afternoon"
         case 17..<22:
             return "Good Evening"
         default:
-            return "Good Night"
+            return "🌝 Good Night"
         }
     }
     

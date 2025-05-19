@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct RoutineTimerView: View {
     let routine: Routine
@@ -31,6 +32,9 @@ struct RoutineTimerView: View {
             VStack(spacing: 32) {
                 HStack {
                     Button(action: {
+                        let generator = UIImpactFeedbackGenerator(style: .medium)
+                        generator.prepare()
+                        generator.impactOccurred()
                         print("[DEBUG] Close button tapped. isComplete=\(isComplete), didCallOnComplete=\(didCallOnComplete)")
                         if isComplete && !didCallOnComplete {
                             print("[DEBUG] Calling onComplete from close button")
@@ -164,6 +168,8 @@ struct RoutineTimerView: View {
     }
     
     private func markTaskDoneAndNext() {
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
         completedTaskIndices.insert(currentTaskIndex)
         nextTaskOrFinish()
     }
@@ -184,9 +190,13 @@ struct RoutineTimerView: View {
         timer?.invalidate()
         if currentTaskIndex < routine.tasks.count - 1 {
             currentTaskIndex += 1
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            generator.impactOccurred()
             startTask()
         } else {
             isComplete = true
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.success)
             completionRingProgress = 0.0
             DispatchQueue.main.async {
                 withAnimation(.easeInOut(duration: 1)) {

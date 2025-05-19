@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct RoutineDetailView: View {
     @State var routine: Routine
@@ -120,6 +121,9 @@ struct RoutineDetailView: View {
                 HStack {
                     Spacer()
                     Button(action: {
+                        let generator = UIImpactFeedbackGenerator(style: .medium)
+                        generator.prepare()
+                        generator.impactOccurred()
                         showingTimer = true
                     }) {
                         Text(isRunning ? "Running..." : "Start")
@@ -214,6 +218,8 @@ struct RoutineDetailView: View {
     }
     
     private func toggleTaskCompletion(index: Int) {
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
         if completedTaskIndices.contains(index) {
             completedTaskIndices.remove(index)
         } else {
