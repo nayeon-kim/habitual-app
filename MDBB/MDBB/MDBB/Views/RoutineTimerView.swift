@@ -14,6 +14,10 @@ struct RoutineTimerView: View {
     @State private var completionRingProgress: CGFloat = 0.0
     @State private var didCallOnComplete = false
     
+    private var nextTask: Task? {
+        routine.tasks[safe: currentTaskIndex + 1]
+    }
+    
     var body: some View {
         ZStack {
             Color.red.ignoresSafeArea() // TEMP: Should see a red background
@@ -94,21 +98,42 @@ struct RoutineTimerView: View {
                                 .foregroundColor(.white)
                         }
                         
+                        if let nextTask = nextTask {
+                            HStack(spacing: 12) {
+                                Image(systemName: "arrow.right")
+                                    .font(.subheadline)
+                                    .foregroundColor(.white.opacity(0.7))
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Next: \(nextTask.name)")
+                                        .font(.subheadline)
+                                        .foregroundColor(.white.opacity(0.7))
+                                    Text(nextTask.formattedDuration)
+                                        .font(.caption)
+                                        .foregroundColor(.white.opacity(0.5))
+                                }
+                            }
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .background(Color.white.opacity(0.1))
+                            .cornerRadius(12)
+                        }
+                        
                         Button(action: {
                             markTaskDoneAndNext()
                         }) {
                             HStack {
                                 Image(systemName: completedTaskIndices.contains(currentTaskIndex) ? "checkmark.circle.fill" : "circle")
                                     .font(.title)
-                                    .foregroundColor(completedTaskIndices.contains(currentTaskIndex) ? .green : .gray)
+                                    .foregroundColor(completedTaskIndices.contains(currentTaskIndex) ? .green : .white.opacity(0.7))
                                 Text(completedTaskIndices.contains(currentTaskIndex) ? "Done" : "Mark as Done")
                                     .font(.title3)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.white.opacity(0.7))
                             }
-                            .padding(.vertical, 10)
-                            .padding(.horizontal, 24)
-                            .background(Color.green.opacity(0.2))
-                            .cornerRadius(20)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 16)
+                            .background(Color.white.opacity(0.1))
+                            .cornerRadius(12)
                         }
                     }
                 }
