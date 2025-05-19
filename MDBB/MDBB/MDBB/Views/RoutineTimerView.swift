@@ -14,6 +14,8 @@ struct RoutineTimerView: View {
     @State private var autoDismissWorkItem: DispatchWorkItem? = nil
     @State private var completionRingProgress: CGFloat = 0.0
     @State private var didCallOnComplete = false
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var backgroundEnteredAt: Date? = nil
     
     private var nextTask: Task? {
         routine.tasks[safe: currentTaskIndex + 1]
@@ -165,6 +167,21 @@ struct RoutineTimerView: View {
             timer = nil
             autoDismissWorkItem?.cancel()
         }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .background {
+                backgroundEnteredAt = Date()
+                timer?.invalidate()
+            } else if newPhase == .active, let backgroundDate = backgroundEnteredAt {
+                let elapsed = Date().timeIntervalSince(backgroundDate)
+                backgroundEnteredAt = nil
+                timeRemaining = max(0, timeRemaining - elapsed)
+                if !isComplete, routine.tasks[safe: currentTaskIndex] != nil, timeRemaining > 0 {
+                    startTask()
+                } else if !isComplete, timeRemaining <= 0 {
+                    nextTaskOrFinish()
+                }
+            }
+        }
     }
     
     private func markTaskDoneAndNext() {
@@ -176,7 +193,9 @@ struct RoutineTimerView: View {
     
     private func startTask() {
         guard let currentTask = routine.tasks[safe: currentTaskIndex] else { return }
-        timeRemaining = currentTask.duration
+        if timeRemaining == 0 {
+            timeRemaining = currentTask.duration
+        }
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             if timeRemaining > 0 {
                 timeRemaining -= 1
