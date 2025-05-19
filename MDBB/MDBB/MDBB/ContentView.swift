@@ -71,6 +71,17 @@ struct ContentView: View {
                                 .padding(.horizontal, 16)
                         }
                         
+                        // Subheader
+                        HStack {
+                            Text("Today")
+                                .font(.headline)
+                                .foregroundColor(.white.opacity(0.8))
+                                .padding(.leading, 20)
+                                .padding(.top, 8)
+                                .padding(.bottom, 4)
+                            Spacer()
+                        }
+                        
                         LazyVStack(spacing: Theme.padding) {
                             ForEach(routineStore.routines) { routine in
                                 RoutineCard(
@@ -102,7 +113,7 @@ struct ContentView: View {
                     HStack {
                         Image(systemName: "plus.circle.fill")
                             .font(.system(size: 28))
-                        Text("Add New Routine")
+                        Text("Add new routine")
                             .font(.title2)
                             .fontWeight(.semibold)
                         Spacer()

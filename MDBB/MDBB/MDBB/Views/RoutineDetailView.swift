@@ -73,9 +73,11 @@ struct RoutineDetailView: View {
                                 if completedTaskIndices.contains(index) {
                                     Image(systemName: "checkmark.circle.fill")
                                         .foregroundColor(.green)
+                                        .font(.system(size: 28))
                                 } else {
                                     Image(systemName: "circle")
                                         .foregroundColor(.gray)
+                                        .font(.system(size: 28))
                                 }
                             }
                             .buttonStyle(PlainButtonStyle())
@@ -92,7 +94,8 @@ struct RoutineDetailView: View {
                         HStack {
                             Image(systemName: "plus.circle")
                                 .foregroundColor(.white)
-                            Text("Add New Task")
+                                .font(.system(size: 28))
+                            Text("Add new task")
                                 .foregroundColor(.white)
                         }
                     }
@@ -131,9 +134,9 @@ struct RoutineDetailView: View {
                             .fontWeight(.bold)
                             .padding()
                             .frame(width: 180)
-                            .background(isRunning ? Color.gray : Color(red: 70/255, green: 20/255, blue: 172/255))
+                            .background(isRunning ? Color.gray : Color.white.opacity(0.2))
                             .foregroundColor(.white)
-                            .cornerRadius(30)
+                            .cornerRadius(20)
                             .shadow(radius: 10)
                     }
                     .padding(.bottom, 32)
