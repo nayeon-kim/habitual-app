@@ -2,7 +2,7 @@ import SwiftUI
 import UIKit
 
 struct RoutineDetailView: View {
-    @State var routine: Routine
+    let routineId: UUID
     @ObservedObject var routineStore: RoutineStore
     @Environment(\.dismiss) private var dismiss
     @State private var showingAddTask = false
@@ -16,13 +16,17 @@ struct RoutineDetailView: View {
     @Environment(\.editMode) private var editMode
     var onBack: (() -> Void)? = nil
     
+    private var routine: Routine? {
+        routineStore.routines.first(where: { $0.id == routineId })
+    }
+    
     private var shouldResetCompletionState: Bool {
-        guard let lastCompleted = routine.lastCompleted else { return true }
+        guard let lastCompleted = routine?.lastCompleted else { return true }
         return !Calendar.current.isDate(lastCompleted, inSameDayAs: Date())
     }
     
     private func loadCompletionState() {
-        // If the routine was completed today, mark all tasks as completed
+        guard let routine = routine else { completedTaskIndices = []; return }
         if let lastCompleted = routine.lastCompleted,
            Calendar.current.isDate(lastCompleted, inSameDayAs: Date()) {
             completedTaskIndices = Set(0..<routine.tasks.count)
@@ -35,12 +39,29 @@ struct RoutineDetailView: View {
         ZStack(alignment: .topLeading) {
             Theme.background
                 .ignoresSafeArea()
-            VStack(alignment: .leading, spacing: 0) {
-                // Header with back button and title
-                HStack(spacing: 12) {
-                    if let onBack = onBack {
-                        Button(action: onBack) {
-                            Image(systemName: "arrow.left")
+            if let routine = routine {
+                VStack(alignment: .leading, spacing: 0) {
+                    // Header with back button and title
+                    HStack(spacing: 12) {
+                        if let onBack = onBack {
+                            Button(action: onBack) {
+                                Image(systemName: "arrow.left")
+                                    .font(.title2)
+                                    .foregroundColor(.white)
+                                    .padding(12)
+                                    .background(Color.white.opacity(0.2))
+                                    .clipShape(Circle())
+                            }
+                        }
+                        Text(routine.name)
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.7)
+                        Spacer()
+                        Button(action: { showingEditRoutine = true }) {
+                            Image(systemName: "pencil")
                                 .font(.title2)
                                 .foregroundColor(.white)
                                 .padding(12)
@@ -48,78 +69,62 @@ struct RoutineDetailView: View {
                                 .clipShape(Circle())
                         }
                     }
-                    Text(routine.name)
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.7)
-                    Spacer()
-                    Button(action: { showingEditRoutine = true }) {
-                        Image(systemName: "pencil")
-                            .font(.title2)
-                            .foregroundColor(.white)
-                            .padding(12)
-                            .background(Color.white.opacity(0.2))
-                            .clipShape(Circle())
-                    }
-                }
-                .padding(.top, 44)
-                .padding(.horizontal)
-                // Tasks List (List)
-                List {
-                    ForEach(Array(routine.tasks.enumerated()), id: \.element.id) { index, task in
-                        HStack {
-                            Button(action: {
-                                toggleTaskCompletion(index: index)
-                            }) {
-                                if completedTaskIndices.contains(index) {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .foregroundColor(Color.habitualGreen)
-                                        .font(.system(size: 28))
-                                } else {
-                                    Image(systemName: "circle")
-                                        .foregroundColor(.gray)
-                                        .font(.system(size: 28))
+                    .padding(.top, 44)
+                    .padding(.horizontal)
+                    // Tasks List (List)
+                    List {
+                        ForEach(Array(routine.tasks.enumerated()), id: \ .element.id) { index, task in
+                            HStack {
+                                Button(action: {
+                                    toggleTaskCompletion(index: index)
+                                }) {
+                                    if completedTaskIndices.contains(index) {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundColor(Color.habitualGreen)
+                                            .font(.system(size: 28))
+                                    } else {
+                                        Image(systemName: "circle")
+                                            .foregroundColor(.gray)
+                                            .font(.system(size: 28))
+                                    }
                                 }
+                                .buttonStyle(PlainButtonStyle())
+                                Text(task.name)
+                                    .foregroundColor(.white)
+                                Spacer()
+                                Text(task.formattedDuration)
+                                    .foregroundColor(.white)
+                                    .font(.subheadline)
                             }
-                            .buttonStyle(PlainButtonStyle())
-                            Text(task.name)
-                                .foregroundColor(.white)
-                            Spacer()
-                            Text(task.formattedDuration)
-                                .foregroundColor(.white)
-                                .font(.subheadline)
+                            .padding(.vertical, 2)
                         }
-                        .padding(.vertical, 2)
-                    }
-                    // Add New Task Button
-                    Button(action: { showingAddTask = true }) {
-                        HStack {
-                            Image(systemName: "plus.circle")
-                                .foregroundColor(.white)
-                                .font(.system(size: 28))
-                            Text("Add new task")
-                                .foregroundColor(.white)
+                        // Add New Task Button
+                        Button(action: { showingAddTask = true }) {
+                            HStack {
+                                Image(systemName: "plus.circle")
+                                    .foregroundColor(.white)
+                                    .font(.system(size: 28))
+                                Text("Add new task")
+                                    .foregroundColor(.white)
+                            }
                         }
                     }
-                }
-                .listStyle(InsetGroupedListStyle())
-                .background(Color.clear)
-                .listRowBackground(Color.clear)
-                .scrollContentBackground(.hidden)
-                // Show current task and timer if running
-                if isRunning, let currentTask = routine.tasks[safe: currentTaskIndex] {
-                    VStack(spacing: 8) {
-                        Text("Current Task: \(currentTask.name)")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                        Text(timeString(from: timeRemaining))
-                            .font(.system(size: 40, weight: .bold, design: .monospaced))
-                            .foregroundColor(.white)
+                    .listStyle(InsetGroupedListStyle())
+                    .background(Color.clear)
+                    .listRowBackground(Color.clear)
+                    // Show current task and timer if running
+                    if isRunning, let currentTask = routine.tasks[safe: currentTaskIndex] {
+                        VStack(spacing: 8) {
+                            Text("Current Task: \(currentTask.name)")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                            Text(timeString(from: timeRemaining))
+                                .font(.system(size: 40, weight: .bold, design: .monospaced))
+                                .foregroundColor(.white)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
                 }
             }
             // Floating Start Button
@@ -150,64 +155,61 @@ struct RoutineDetailView: View {
             }
         }
         .sheet(isPresented: $showingAddTask) {
-            AddTaskView { task in
-                var updatedRoutine = routine
-                updatedRoutine.tasks.append(task)
-                routine = updatedRoutine
-                routineStore.updateRoutine(updatedRoutine)
+            if let routine = routine {
+                AddTaskView { task in
+                    var updatedRoutine = routine
+                    updatedRoutine.tasks.append(task)
+                    routineStore.updateRoutine(updatedRoutine)
+                }
             }
         }
         .fullScreenCover(isPresented: $showingTimer) {
-            RoutineTimerView(
-                routine: routine,
-                completedTaskIndices: $completedTaskIndices,
-                onClose: {
-                    showingTimer = false
-                },
-                onComplete: {
-                    print("[DEBUG] onComplete called for routine: \(routine.name)")
-                    // Dismiss detail view first
-                    onBack?()
-                    // Delay the update so the home screen is visible when the value changes
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                        var updatedRoutine = routine
-                        let today = Date()
-                        let calendar = Calendar.current
-                        if !updatedRoutine.completionDates.contains(where: { calendar.isDate($0, inSameDayAs: today) }) {
-                            print("[DEBUG] Appending today to completionDates for routine: \(routine.name)")
-                            updatedRoutine.completionDates.append(today)
-                            updatedRoutine.lastCompleted = today
-                            updatedRoutine.streak += 1
-                            print("[DEBUG] Before updateRoutine: completionDates=\(updatedRoutine.completionDates), lastCompleted=\(String(describing: updatedRoutine.lastCompleted))")
-                            routineStore.updateRoutine(updatedRoutine)
-                            routine = updatedRoutine
-                            print("[DEBUG] After updateRoutine: completionDates=\(updatedRoutine.completionDates), lastCompleted=\(String(describing: updatedRoutine.lastCompleted))")
-                            // Fetch the updated routine from the store to ensure local state is in sync
-                            if let refreshed = routineStore.routines.first(where: { $0.id == routine.id }) {
-                                print("[DEBUG] Refreshed routine from store: completionDates=\(refreshed.completionDates), lastCompleted=\(String(describing: refreshed.lastCompleted))")
-                                routine = refreshed
+            if let routine = routine {
+                RoutineTimerView(
+                    routine: routine,
+                    completedTaskIndices: $completedTaskIndices,
+                    onClose: {
+                        showingTimer = false
+                    },
+                    onComplete: {
+                        print("[DEBUG] onComplete called for routine: \(routine.name)")
+                        // Dismiss detail view first
+                        onBack?()
+                        // Delay the update so the home screen is visible when the value changes
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                            var updatedRoutine = routine
+                            let today = Date()
+                            let calendar = Calendar.current
+                            if !updatedRoutine.completionDates.contains(where: { calendar.isDate($0, inSameDayAs: today) }) {
+                                print("[DEBUG] Appending today to completionDates for routine: \(routine.name)")
+                                updatedRoutine.completionDates.append(today)
+                                updatedRoutine.lastCompleted = today
+                                updatedRoutine.streak += 1
+                                print("[DEBUG] Before updateRoutine: completionDates=\(updatedRoutine.completionDates), lastCompleted=\(String(describing: updatedRoutine.lastCompleted))")
+                                routineStore.updateRoutine(updatedRoutine)
+                                print("[DEBUG] After updateRoutine: completionDates=\(updatedRoutine.completionDates), lastCompleted=\(String(describing: updatedRoutine.lastCompleted))")
+                                completedTaskIndices = []
                             }
-                            completedTaskIndices = []
+                            print("[DEBUG] onComplete finished for routine: \(routine.name)")
                         }
-                        print("[DEBUG] onComplete finished for routine: \(routine.name)")
                     }
-                }
-            )
+                )
+            }
         }
         .sheet(isPresented: $showingEditRoutine) {
-            EditRoutineView(
-                routine: $routine,
-                routineStore: routineStore,
-                onDelete: {
-                    onBack?()
-                },
-                onSave: {
-                    if let refreshed = routineStore.routines.first(where: { $0.id == routine.id }) {
-                        routine = refreshed
-                    }
-                },
-                isCreation: false
-            )
+            if let routine = routine {
+                EditRoutineView(
+                    routine: .constant(routine),
+                    routineStore: routineStore,
+                    onDelete: {
+                        onBack?()
+                    },
+                    onSave: {
+                        // No need to update local state, will re-fetch from store
+                    },
+                    isCreation: false
+                )
+            }
         }
         .onAppear {
             UITableView.appearance().backgroundColor = .clear
@@ -227,21 +229,22 @@ struct RoutineDetailView: View {
     private func toggleTaskCompletion(index: Int) {
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.impactOccurred()
-        if completedTaskIndices.contains(index) {
-            completedTaskIndices.remove(index)
+        guard let routine = routine else { return }
+        var updatedIndices = completedTaskIndices
+        if updatedIndices.contains(index) {
+            updatedIndices.remove(index)
         } else {
-            completedTaskIndices.insert(index)
-            
+            updatedIndices.insert(index)
             // Check if all tasks are completed
-            if completedTaskIndices.count == routine.tasks.count {
+            if updatedIndices.count == routine.tasks.count {
                 var updatedRoutine = routine
                 updatedRoutine.streak += 1
                 updatedRoutine.lastCompleted = Date()
                 updatedRoutine.completionDates.append(Date())
                 routineStore.updateRoutine(updatedRoutine)
-                routine = updatedRoutine
             }
         }
+        completedTaskIndices = updatedIndices
     }
     
     private func timeString(from timeInterval: TimeInterval) -> String {
@@ -364,6 +367,10 @@ struct EditRoutineView: View {
                         routine.name = editedName
                         routine.tasks = editedTasks
                         routineStore.updateRoutine(routine)
+                        // Reload from store to ensure parent sees changes
+                        if let refreshed = routineStore.routines.first(where: { $0.id == routine.id }) {
+                            routine = refreshed
+                        }
                         onSave?()
                         dismiss()
                     }
@@ -380,6 +387,13 @@ struct EditRoutineView: View {
             .sheet(isPresented: $showingAddTask) {
                 AddTaskView { task in
                     editedTasks.append(task)
+                    // Auto-save to routine and store
+                    routine.name = editedName
+                    routine.tasks = editedTasks
+                    routineStore.updateRoutine(routine)
+                    if let refreshed = routineStore.routines.first(where: { $0.id == routine.id }) {
+                        routine = refreshed
+                    }
                 }
             }
             .alert(isPresented: $showDeleteAlert) {

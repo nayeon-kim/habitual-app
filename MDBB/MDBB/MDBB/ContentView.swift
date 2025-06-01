@@ -24,7 +24,7 @@ struct ContentView: View {
         
         switch hour {
         case 4..<13:
-            return "🌞Good Morning"
+            return "🌞 Good Morning"
         case 13..<17:
             return "Good Afternoon"
         case 17..<22:
@@ -36,107 +36,14 @@ struct ContentView: View {
     
     var body: some View {
         ZStack {
-            // First radial gradient (top right, bright purple)
-            RadialGradient(
-                gradient: Gradient(colors: [Color.purple.opacity(0.8), Color.black.opacity(0.6)]),
-                center: .topTrailing,
-                startRadius: 50,
-                endRadius: 500
-            )
-            .ignoresSafeArea()
-
-            // Second radial gradient (bottom left, deep blue/purple)
-            RadialGradient(
-                gradient: Gradient(colors: [Color.blue.opacity(0.5), Color.black]),
-                center: .bottomLeading,
-                startRadius: 100,
-                endRadius: 600
-            )
-            .ignoresSafeArea()
-            
+            backgroundView
             VStack(spacing: 0) {
-                // Greeting
-                Text(currentGreeting)
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 16)
-                    .padding(.top, 24)
-                    .padding(.bottom, 24)
-                
+                greetingView
                 ScrollView {
-                    // Subheader
-                    HStack {
-                        Text("Weekly progress")
-                            .font(.headline)
-                            .foregroundColor(.white.opacity(0.8))
-                            .padding(.leading, 20)
-                            .padding(.top, 8)
-                            .padding(.bottom, 8)
-                        Spacer()
-                    }
-                    
-                    VStack(spacing: Theme.padding) {
-                        if !routineStore.routines.isEmpty {
-                            WeeklyStreakCard(routines: routineStore.routines)
-                                .padding(.horizontal, 16)
-                        }
-                        
-                        // Subheader
-                        HStack {
-                            Text("Today")
-                                .font(.headline)
-                                .foregroundColor(.white.opacity(0.8))
-                                .padding(.leading, 20)
-                                .padding(.top, 8)
-                                .padding(.bottom, 4)
-                            Spacer()
-                        }
-                        
-                        LazyVStack(spacing: Theme.padding) {
-                            ForEach(routineStore.routines) { routine in
-                                RoutineCard(
-                                    routine: routine,
-                                    onPlay: {
-                                        timerRoutine = routine
-                                        timerCompletedTaskIndices = []
-                                        DispatchQueue.main.async {
-                                            showTimer = true
-                                        }
-                                    },
-                                    onDetail: {
-                                        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                                            selectedRoutine = routine
-                                            showDetail = true
-                                        }
-                                    }
-                                )
-                                .matchedGeometryEffect(id: routine.id, in: cardAnimation)
-                            }
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.horizontal, 16)
-                    }
+                    streakSection
+                    todaySection
                 }
-                
-                // Large Add Button
-                Button(action: { showingAddRoutine = true }) {
-                    HStack {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 28))
-                        Text("Add new routine")
-                            .font(.title2)
-                            .fontWeight(.semibold)
-                        Spacer()
-                    }
-                    .padding()
-                    .background(Color.white.opacity(0.2))
-                    .foregroundColor(.white)
-                    .cornerRadius(20)
-                    .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-                    .padding(.horizontal, 16)
-                }
-                .padding(.bottom, 16)
+                addButton
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -144,6 +51,9 @@ struct ContentView: View {
                     Text("My Routines")
                         .font(.subheadline)
                         .foregroundColor(Theme.textSecondary)
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Edit") {}
                 }
             }
             .sheet(isPresented: $showingAddRoutine) {
@@ -175,31 +85,7 @@ struct ContentView: View {
                     }
                 }
             }
-            if let routine = selectedRoutine, showDetail {
-                Color.black.opacity(0.5)
-                    .ignoresSafeArea()
-                    .transition(.opacity)
-                    .zIndex(1)
-                ZStack(alignment: .topLeading) {
-                    if let latestRoutine = routineStore.routines.first(where: { $0.id == routine.id }) {
-                        RoutineDetailView(
-                            routine: latestRoutine,
-                            routineStore: routineStore,
-                            onBack: {
-                                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                                    showDetail = false
-                                }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                    selectedRoutine = nil
-                                }
-                            }
-                        )
-                        .matchedGeometryEffect(id: routine.id, in: cardAnimation)
-                        .zIndex(2)
-                    }
-                }
-                .zIndex(2)
-            }
+            overlayViews
         }
         .preferredColorScheme(.dark)
         .onAppear {
@@ -219,6 +105,148 @@ struct ContentView: View {
         }
         .onChange(of: selectedRoutine) { print("selectedRoutine changed to \(String(describing: $0?.name))") }
         .onChange(of: showDetail) { print("showDetail changed to \($0)") }
+    }
+
+    private var backgroundView: some View {
+        ZStack {
+            RadialGradient(
+                gradient: Gradient(colors: [Color.purple.opacity(0.8), Color.black.opacity(0.6)]),
+                center: .topTrailing,
+                startRadius: 50,
+                endRadius: 500
+            )
+            .ignoresSafeArea()
+            RadialGradient(
+                gradient: Gradient(colors: [Color.blue.opacity(0.5), Color.black]),
+                center: .bottomLeading,
+                startRadius: 100,
+                endRadius: 600
+            )
+            .ignoresSafeArea()
+        }
+    }
+
+    private var greetingView: some View {
+        Text(currentGreeting)
+            .font(.system(size: 32, weight: .bold))
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 16)
+            .padding(.top, 24)
+            .padding(.bottom, 24)
+    }
+
+    private var streakSection: some View {
+        if !routineStore.routines.isEmpty {
+            return VStack(spacing: Theme.padding) {
+                // Subheader
+                HStack {
+                    Text("Weekly progress")
+                        .font(.headline)
+                        .foregroundColor(.white.opacity(0.8))
+                        .padding(.leading, 20)
+                        .padding(.top, 8)
+                        .padding(.bottom, 8)
+                    Spacer()
+                }
+                WeeklyStreakCard(routines: routineStore.routines)
+                    .padding(.horizontal, 16)
+            }
+        } else {
+            return EmptyView()
+        }
+    }
+
+    private var todaySection: some View {
+        if !routineStore.routines.isEmpty {
+            return VStack(spacing: Theme.padding) {
+                // Subheader
+                HStack {
+                    Text("Today")
+                        .font(.headline)
+                        .foregroundColor(.white.opacity(0.8))
+                        .padding(.leading, 20)
+                        .padding(.top, 8)
+                        .padding(.bottom, 4)
+                    Spacer()
+                }
+                LazyVStack(spacing: Theme.padding) {
+                    ForEach(routineStore.routines) { routine in
+                        RoutineCard(
+                            routine: routine,
+                            onPlay: {
+                                timerRoutine = routine
+                                timerCompletedTaskIndices = []
+                                DispatchQueue.main.async {
+                                    showTimer = true
+                                }
+                            },
+                            onDetail: {
+                                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                                    selectedRoutine = routine
+                                    showDetail = true
+                                }
+                            }
+                        )
+                        .matchedGeometryEffect(id: routine.id, in: cardAnimation)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 16)
+            }
+        } else {
+            return EmptyView()
+        }
+    }
+
+    private var addButton: some View {
+        Button(action: { showingAddRoutine = true }) {
+            HStack {
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: 28))
+                Text("Add new routine")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                Spacer()
+            }
+            .padding()
+            .background(Color.white.opacity(0.2))
+            .foregroundColor(.white)
+            .cornerRadius(20)
+            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+            .padding(.horizontal, 16)
+        }
+        .padding(.bottom, 16)
+    }
+
+    private var overlayViews: some View {
+        if let routine = selectedRoutine, showDetail {
+            Color.black.opacity(0.5)
+                .ignoresSafeArea()
+                .transition(.opacity)
+                .zIndex(1)
+            ZStack(alignment: .topLeading) {
+                if let latestRoutine = routineStore.routines.first(where: { $0.id == routine.id }) {
+                    RoutineDetailView(
+                        routine: latestRoutine,
+                        routineStore: routineStore,
+                        onBack: {
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                                showDetail = false
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                selectedRoutine = nil
+                            }
+                        }
+                    )
+                    .matchedGeometryEffect(id: routine.id, in: cardAnimation)
+                    .zIndex(2)
+                }
+            }
+            .zIndex(2)
+        } else {
+            EmptyView()
+        }
     }
 }
 
